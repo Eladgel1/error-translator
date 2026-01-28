@@ -1,4 +1,6 @@
-# justfile — Developer commands for error-translator monorepo
+# =========================================
+# JUSTFILE — Developer commands for error-translator monorepo
+# =========================================
 
 # Directory variables
 BACKEND_DIR := "backend"
@@ -6,39 +8,51 @@ FRONTEND_DIR := "frontend"
 
 # Default command: list all tasks
 default:
-    @just --list
+    @just help
 
-# Show help with descriptions
+# -----------------------------------------
+# HELP
+# -----------------------------------------
 help:
     @echo ""
     @echo "Available commands:"
-    @echo "  just dev        - Run backend and frontend (placeholder)"
-    @echo "  just backend    - Run backend only (placeholder)"
-    @echo "  just frontend   - Run frontend only (placeholder)"
-    @echo "  just test       - Run all tests (placeholder)"
-    @echo "  just lint       - Run linters/formatters (placeholder)"
+    @echo "  just backend-dev       - Run backend dev server (requires venv)"
+    @echo "  just test-backend      - Run backend tests (pytest)"
+    @echo "  just lint-backend      - Run backend linter (ruff check)"
+    @echo "  just format-backend    - Format backend code (ruff format)"
+    @echo "  just test              - Run all tests (currently backend only)"
+    @echo "  just lint              - Run all linters (currently backend only)"
     @echo ""
-    @echo "(These will become real commands as backend/frontend are implemented.)"
+    @echo "Tip: for backend Python commands, activate the venv first:"
+    @echo "  cd backend && .\\.venv\\Scripts\\Activate.ps1"
 
-# Backend dev server (placeholder)
-backend:
-    echo "TODO: implement backend dev command"
-    echo "Run backend manually from {{BACKEND_DIR}} for now."
+# -----------------------------------------
+# BACKEND DEV SERVER
+# -----------------------------------------
+backend-dev:
+    cd {{BACKEND_DIR}} && python -m uvicorn app.main:app --reload
 
-# Frontend dev server (placeholder)
-frontend:
-    echo "TODO: implement frontend dev command"
-    echo "Run frontend manually from {{FRONTEND_DIR}} for now."
+# -----------------------------------------
+# BACKEND TESTS
+# -----------------------------------------
+test-backend:
+    cd {{BACKEND_DIR}} && pytest
 
-# Full dev (FE + BE)
-dev:
-    echo "TODO: implement full dev environment (backend + frontend)"
-    echo "For now, run backend and frontend in two terminals."
+# -----------------------------------------
+# BACKEND LINT
+# -----------------------------------------
+lint-backend:
+    cd {{BACKEND_DIR}} && ruff check app tests
 
-# Run tests
-test:
-    echo "TODO: implement pytest + vitest tests"
+# -----------------------------------------
+# BACKEND FORMATTER
+# -----------------------------------------
+format-backend:
+    cd {{BACKEND_DIR}} && ruff format app tests
 
-# Run linters
-lint:
-    echo "TODO: implement ruff + eslint linters"
+# -----------------------------------------
+# GLOBAL ALIASES
+# -----------------------------------------
+test: test-backend
+
+lint: lint-backend

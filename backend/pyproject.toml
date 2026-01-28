@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length=100
+target-version= "py312"
+src = ["app", "tests"]
+select = ["E", "F", "I"]
+ignore = []
+fix = true
+
+[tool.ruff.lint]
+# New rules
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+asyncio_mode = "auto"
+
