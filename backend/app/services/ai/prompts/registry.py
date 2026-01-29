@@ -1,8 +1,6 @@
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-import re
-from sys import version
 from typing import Dict
 
 from app.schemas.ai_response import SupportedLanguage
