@@ -20,7 +20,7 @@ def test_scrub_paths_emails_and_secrets():
             raise ValueError("boom")
 
         Contact: john.doe@example.com
-        API key: sk_test_abcdefghijklmnopqrstuvwx
+        API key: sk_dummy_key_for_tests_only_123456
         """
     ).strip()
 
