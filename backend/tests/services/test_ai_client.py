@@ -1,5 +1,4 @@
 import pytest
-
 from app.schemas.ai_response import AIResponse
 from app.services.ai.client import AIClient
 from app.services.ai.errors import (
@@ -42,7 +41,7 @@ def test_parse_ai_response_invalid_json_raises_parse_error():
 
     with pytest.raises(AIResponseParseError):
         AIClient.parse_ai_response(raw)
-    
+
 
 def test_parse_ai_response_validation_error_raises_validation_error():
     raw = """

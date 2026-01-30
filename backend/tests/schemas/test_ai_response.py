@@ -1,5 +1,4 @@
 import pytest
-
 from app.schemas.ai_response import AIResponse, SupportedLanguage
 
 

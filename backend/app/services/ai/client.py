@@ -6,18 +6,18 @@ from pydantic import BaseModel, ValidationError
 
 from app.core.config import settings
 from app.schemas.ai_response import AIResponse, SupportedLanguage
-from app.services.ai.prompts.registry import PromptVersion
 from app.services.ai.errors import (
     AIClientError,
+    AIConfigurationError,
     AINetworkError,
     AIProviderError,
     AIResponseParseError,
     AIResponseValidationError,
-    AIConfigurationError,
 )
-
+from app.services.ai.prompts.registry import PromptVersion
 
 # AI Client Configuration
+
 
 class AIClientConfig(BaseModel):
     base_url: str
@@ -37,7 +37,7 @@ class AIClientConfig(BaseModel):
             max_retries=settings.ai_max_retries,
             provider=settings.ai_provider,
         )
-    
+
 
 # AI Client (Gemini 3 Flash)
 class AIClient:
@@ -56,7 +56,7 @@ class AIClient:
 
         if not self._config.api_key:
             raise AIConfigurationError("GEMINI_API_KEY is not configured.")
-        
+
         self._client = http_client or httpx.AsyncClient(
             base_url=self._config.base_url,
             timeout=self._config.timeout_seconds,
@@ -65,7 +65,6 @@ class AIClient:
     async def aclose(self) -> None:
         """Close the underlying HTTP client."""
         await self._client.aclose()
-
 
     # ---- Main AI call ----
 
@@ -97,16 +96,16 @@ class AIClient:
                         status_code=response.status_code,
                         message="AI provider server error",
                     )
-                
+
                 if 400 <= response.status_code < 500:
                     raise AIProviderError(
                         status_code=response.status_code,
                         message=response.text,
                     )
-                
+
                 raw_text = self._extract_content(response.json())
                 return self.parse_ai_response(raw_text)
-            
+
             except (httpx.TimeoutException, httpx.NetworkError, httpx.HTTPError) as exc:
                 last_exc = exc
                 if attempt == self._config.max_retries:
@@ -116,7 +115,7 @@ class AIClient:
                 raise
 
         raise AINetworkError("AI call failed after retrues") from last_exc
-    
+
     # ---- Gemini-specific request building ----
     def _build_headers(self) -> Dict[str, str]:
         if self._config.provider == "gemini":
@@ -124,12 +123,12 @@ class AIClient:
                 "x-goog-api-key": self._config.api_key or "",
                 "Content-Type": "application/json",
             }
-        
+
         return {
             "Authorization": f"Bearer {self._config.api_key}",
             "Content-Type": "application/json",
         }
-    
+
     def _build_endpoint(self) -> str:
         """
         Gemini REST endpoint:
@@ -137,9 +136,9 @@ class AIClient:
         """
         if self._config.provider == "gemini":
             return f"/models/{self._config.model}:generateContent"
-        
+
         return "/"
-    
+
     def _build_request_body(self, *, prompt: str) -> Dict[str, Any]:
         """
         Build the request body for Gemini (JSON mode).
@@ -157,9 +156,9 @@ class AIClient:
                     "responseMimeType": "application/json",
                 },
             }
-        
+
         return {"contents": [{"parts": [{"text": prompt}]}]}
-    
+
     # ---- Extract Gemini JSON text ----
     def _extract_content(self, provider_response: Dict[str, Any]) -> str:
         """
@@ -170,17 +169,13 @@ class AIClient:
             try:
                 return provider_response["candidates"][0]["content"]["parts"][0]["text"]
             except (KeyError, IndexError, TypeError) as exc:
-                raise AIResponseParseError(
-                    raw_content=json.dumps(provider_response)
-                ) from exc
-        
+                raise AIResponseParseError(raw_content=json.dumps(provider_response)) from exc
+
         try:
             return str(provider_response["output"])
         except KeyError as exc:
-            raise AIResponseParseError(
-                raw_content=json.dumps(provider_response)
-            ) from exc
-    
+            raise AIResponseParseError(raw_content=json.dumps(provider_response)) from exc
+
     # ---- JSON → AIResponse ----
     @staticmethod
     def parse_ai_response(raw_text: str) -> AIResponse:
@@ -192,9 +187,8 @@ class AIClient:
             data = json.loads(raw_text)
         except json.JSONDecodeError as exc:
             raise AIResponseParseError(raw_content=raw_text) from exc
-        
+
         try:
             return AIResponse.model_validate(data)
         except ValidationError as exc:
             raise AIResponseValidationError(errors=exc.errors()) from exc
-        

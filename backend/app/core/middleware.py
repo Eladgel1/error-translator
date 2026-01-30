@@ -22,6 +22,7 @@ DEFAULT_CORS_ORIGINS = [
 
 # ---- Request context ----
 
+
 class RequestContextMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         import uuid
@@ -48,9 +49,10 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         )
 
         return response
-    
+
 
 # ---- Simple in-memory rate Limiter (pre-process) ----
+
 
 class ReateLimitMiddleWare(BaseHTTPMiddleware):
     def __init__(
@@ -97,11 +99,12 @@ class ReateLimitMiddleWare(BaseHTTPMiddleware):
                     "request_id": request_id,
                 },
             )
-        
+
         return await call_next(request)
-    
+
 
 # ---- Main init function ----
+
 
 def init_middlewares(app: FastAPI) -> None:
     """

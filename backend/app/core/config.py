@@ -1,12 +1,13 @@
 from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     app_name: str = "Error Translator API"
     environment: str = "local"
     debug: bool = True
-
 
     # --- AI client configuration ---
     ai_provider: Literal["gemini", "dummy"] = "gemini"
@@ -16,9 +17,9 @@ class Settings(BaseSettings):
     ai_request_timeout_seconds: float = 15.0
     ai_max_retries: int = 2
 
-
     class config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
 
 settings = Settings()
