@@ -36,4 +36,5 @@ class AIResponseValidationError(AIClientError):
 
 class AIConfigurationError(AIClientError):
     """Raised when required AI configuration (e.g. API key) is missing."""
+
     pass

@@ -1,7 +1,6 @@
 import logging
 from logging import Logger
 
-
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 
 
@@ -20,7 +19,7 @@ def configure_logging(level: int = logging.info) -> None:
 
 def get_logger(name: str = "error-translator") -> Logger:
     """
-    Convenience helper to get a namespaced logger.        
+    Convenience helper to get a namespaced logger.
     """
 
     return logging.getLogger(name)

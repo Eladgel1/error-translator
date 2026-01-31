@@ -1,7 +1,8 @@
 from fastapi import FastAPI
+
 from .core.config import settings
-from .core.middleware import init_middlewares
 from .core.errors import init_error_handlers
+from .core.middleware import init_middlewares
 
 
 def create_app() -> FastAPI:
@@ -17,9 +18,8 @@ def create_app() -> FastAPI:
     # Register global errors handlers
     init_error_handlers(app)
 
-    # Register middlewares 
+    # Register middlewares
     init_middlewares(app)
-
 
     @app.get("/health", tags=["system"])
     async def health_check():
@@ -28,7 +28,8 @@ def create_app() -> FastAPI:
             "app": settings.app_name,
             "environment": settings.environment,
         }
-    
+
     return app
+
 
 app = create_app()

@@ -13,7 +13,7 @@ class AppError(Exception):
     """
     Custom application-level error.
 
-    Use this for predictable business logic erros. 
+    Use this for predictable business logic erros.
     """
 
     def __init__(

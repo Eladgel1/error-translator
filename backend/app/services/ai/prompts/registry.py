@@ -31,13 +31,13 @@ def _load_prompt_from_disk(version: PromptVersion, language: SupportedLanguage) 
 
     if version is not PromptVersion.V1:
         raise FileNotFoundError(f"Unsupported prompt version: {version}")
-    
+
     filename = V1_PROMPT_FILES.get(language, "generic.txt")
     template_path = _PROMPTS_DIR / version.value / filename
 
     if not template_path.is_file():
         raise FileNotFoundError(f"Prompt template not found: {template_path}")
-    
+
     return template_path.read_text(encoding="utf-8")
 
 
@@ -45,7 +45,6 @@ def get_prompt_template(
     language: SupportedLanguage,
     version: PromptVersion = PromptVersion.V1,
 ) -> str:
-    
     """
     Return the raw prompt template for the given language and version.
     """
