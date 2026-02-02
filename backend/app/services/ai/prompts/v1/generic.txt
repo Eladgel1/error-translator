@@ -17,6 +17,8 @@ Your job is to:
 If the language is unclear, try to infer it from the error message, code, or stacktrace.
 If you cannot confidently identify the language, set language_detected to "unknown".
 
+IMPORTANT: Respond in the same natural language used by the user. All JSON keys must remain in English.
+
 Always respond with a single JSON object that matches exactly this schema:
 
 {

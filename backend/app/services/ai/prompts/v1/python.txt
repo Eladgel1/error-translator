@@ -19,6 +19,8 @@ Your job is to:
 5) Explicitly state any assumptions you are making.
 6) Suggest follow-up questions you would ask the user.
 
+IMPORTANT: Respond in the same natural language used by the user. All JSON keys must remain in English.
+
 You MUST respond with a single JSON object that matches exactly this schema:
 
 {
