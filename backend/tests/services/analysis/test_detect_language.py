@@ -57,3 +57,16 @@ def test_unknown_when_no_signals():
     raw = "just some generic error without any language-specific markers"
     lang = detect_language(raw)
     assert lang is SupportedLanguage.UNKNOWN
+
+
+def test_detect_language_uses_language_hint_when_error_is_ambiguous():
+    raw = "ReferenceError: variable is not defined"
+
+    # Ambiguous error → not clearly Python/JS/Java
+    # but the hint should force the detection
+    lang = detect_language(
+        raw,
+        language_hint=SupportedLanguage.JAVASCRIPT
+    )
+
+    assert lang is SupportedLanguage.JAVASCRIPT

@@ -92,3 +92,19 @@ def test_normalize_combines_all_steps():
     assert "<REDACTED_SECRET>" in out
     assert "<REDACTED_EMAIL>" in out
     assert "john" not in out
+
+
+def test_normalize_handles_empty_string_gracefully():
+    result = normalize_error_text("")
+    # Should not crash and should return a string (possibly empty)
+    assert isinstance(result, str)
+
+def test_normalize_does_not_raise_on_control_chars():
+    raw ="Error:\x00\x01 Something went wrong\t\tagain"
+    result = normalize_error_text(raw)
+
+    # Still a string, and core words are preserved
+    assert isinstance(result, str)
+    assert "Error" in result
+    assert "Something" in result
+    assert "wrong" in result
