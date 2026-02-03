@@ -41,7 +41,7 @@ def _build_error_response(
 ) -> JSONResponse:
     request_id = getattr(request.state, "request_id", None)
 
-    payload = Dict[str, Any] = {
+    payload: Dict[str, Any] = {
         "error": {
             "code": code,
             "message": message,

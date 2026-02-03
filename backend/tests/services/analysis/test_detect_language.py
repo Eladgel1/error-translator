@@ -1,4 +1,3 @@
-from ctypes.wintypes import LANGID
 import textwrap
 
 from app.schemas.ai_response import SupportedLanguage

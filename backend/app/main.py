@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from .core.config import settings
 from .core.errors import init_error_handlers
 from .core.middleware import init_middlewares
+from .api.routes.analyze import router as analyze_router
 
 
 def create_app() -> FastAPI:
@@ -20,7 +21,8 @@ def create_app() -> FastAPI:
 
     # Register middlewares
     init_middlewares(app)
-
+    
+    # System health
     @app.get("/health", tags=["system"])
     async def health_check():
         return {
@@ -28,6 +30,8 @@ def create_app() -> FastAPI:
             "app": settings.app_name,
             "environment": settings.environment,
         }
+    
+    app.include_router(analyze_router, prefix="/api")
 
     return app
 

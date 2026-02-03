@@ -135,7 +135,7 @@ class AIClient:
           POST /v1beta/models/{model}:generateContent
         """
         if self._config.provider == "gemini":
-            return f"/models/{self._config.model}:generateContent"
+            return f"/{self._config.model}:generateContent"
 
         return "/"
 
