@@ -15,7 +15,7 @@ IMPORTANT: Respond in the same natural language used by the user. All JSON keys 
 
 You MUST respond with a single JSON object that matches exactly this schema:
 
-{
+{{
   "language_detected": "javascript",
   "summary": "<short explanation of the error in simple terms>",
   "likely_cause": "<most likely root cause>",
@@ -36,7 +36,7 @@ You MUST respond with a single JSON object that matches exactly this schema:
     "<follow-up question 2 to the user>"
   ],
   "confidence": 0.0
-}
+}}
 
 Constraints:
 
