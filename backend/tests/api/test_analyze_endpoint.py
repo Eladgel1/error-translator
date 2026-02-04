@@ -1,9 +1,8 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
-
+from app.api.routes.analyze import get_ai_client
 from app.main import app
 from app.schemas.ai_response import AIResponse, SupportedLanguage
-from app.api.routes.analyze import get_ai_client
+from httpx import ASGITransport, AsyncClient
 
 
 class FakeAIClient:
@@ -16,7 +15,7 @@ class FakeAIClient:
     async def aclose(self) -> None:
         # No-op for test client
         return
-    
+
     async def generate_response(
         self,
         *,
@@ -24,7 +23,6 @@ class FakeAIClient:
         language: SupportedLanguage,
         version,
     ) -> AIResponse:
-        
         return AIResponse(
             language_detected=language,
             summary="Test summary",
@@ -34,7 +32,7 @@ class FakeAIClient:
             followup_questions=["Test followup"],
             confidence=0.99,
         )
-    
+
 
 @pytest.fixture(autouse=True)
 def override_ai_client_dependency():
@@ -45,6 +43,7 @@ def override_ai_client_dependency():
     yield
     app.dependency_overrides.pop(get_ai_client, None)
 
+
 @pytest.mark.asyncio
 async def test_analyze_missing_error_test_returns_422():
     async with AsyncClient(
@@ -53,6 +52,7 @@ async def test_analyze_missing_error_test_returns_422():
     ) as client:
         response = await client.post("/api/analyze", json={})
     assert response.status_code == 422
+
 
 @pytest.mark.asyncio
 async def test_analyze_valid_request_returns_ai_response():
@@ -67,7 +67,7 @@ async def test_analyze_valid_request_returns_ai_response():
         base_url="http://test",
     ) as client:
         response = await client.post("/api/analyze", json=payload)
-    
+
     assert response.status_code == 200
     data = response.json()
 

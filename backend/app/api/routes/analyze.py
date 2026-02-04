@@ -1,23 +1,22 @@
-from typing import Literal, Optional
 from collections.abc import AsyncGenerator
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.schemas.ai_response import AIResponse, SupportedLanguage
-from app.services.analysis.normalize import normalize_error_text
-from app.services.analysis.detect_language import detect_language
 from app.services.ai.client import AIClient
 from app.services.ai.errors import (
+    AIClientError,
+    AIConfigurationError,
     AINetworkError,
     AIProviderError,
     AIResponseParseError,
     AIResponseValidationError,
-    AIConfigurationError,
-    AIClientError,
 )
 from app.services.ai.prompts.registry import PromptVersion, get_prompt_template
-
+from app.services.analysis.detect_language import detect_language
+from app.services.analysis.normalize import normalize_error_text
 
 router = APIRouter(tags=["analysis"])
 
@@ -90,9 +89,7 @@ def _render_prompt(
     )
 
     template_data = {
-        "language_hint": (
-            language_hint.value if language_hint is not None else "unknown"
-        ),
+        "language_hint": (language_hint.value if language_hint is not None else "unknown"),
         "error_message": normalized_error_text,
         "code_snippet": context or "",
         "stacktrace": normalized_error_text,
@@ -101,9 +98,7 @@ def _render_prompt(
     try:
         return prompt_template.format(**template_data)
     except KeyError as exc:
-        raise RuntimeError(
-            f"Prompt template formatting failed: missing placeholder {exc}"
-        ) from exc
+        raise RuntimeError(f"Prompt template formatting failed: missing placeholder {exc}") from exc
 
 
 # POST /api/analyze

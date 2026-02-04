@@ -1,9 +1,8 @@
 import pytest
-from httpx import AsyncClient, ASGITransport
-
+from app.api.routes.followup import get_ai_client
 from app.main import app
 from app.schemas.ai_response import AIResponse, SupportedLanguage
-from app.api.routes.followup import get_ai_client
+from httpx import ASGITransport, AsyncClient
 
 
 class FakeAIClient:
@@ -15,7 +14,7 @@ class FakeAIClient:
 
     async def aclose(self) -> None:
         return
-    
+
     async def generate_response(
         self,
         *,
@@ -23,7 +22,6 @@ class FakeAIClient:
         language: SupportedLanguage,
         version,
     ) -> AIResponse:
-        
         return AIResponse(
             language_detected=language,
             summary="Test follow-up summary",
@@ -34,7 +32,7 @@ class FakeAIClient:
             followup_questions=["Test follow-up question"],
             confidence=0.95,
         )
-    
+
 
 @pytest.fixture(autouse=True)
 def override_ai_client_dependency():
@@ -44,6 +42,7 @@ def override_ai_client_dependency():
     app.dependency_overrides[get_ai_client] = lambda: FakeAIClient()
     yield
     app.dependency_overrides.pop(get_ai_client, None)
+
 
 @pytest.mark.asyncio
 async def test_followup_missing_body_returns_422():

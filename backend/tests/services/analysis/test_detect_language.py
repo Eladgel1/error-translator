@@ -6,7 +6,7 @@ from app.services.analysis.detect_language import detect_language
 
 def test_detect_python_traceback():
     raw = textwrap.dedent(
-         """
+        """
         Traceback (most recent call last):
           File "/home/user/app/main.py", line 10, in <module>
             run()
@@ -64,9 +64,6 @@ def test_detect_language_uses_language_hint_when_error_is_ambiguous():
 
     # Ambiguous error → not clearly Python/JS/Java
     # but the hint should force the detection
-    lang = detect_language(
-        raw,
-        language_hint=SupportedLanguage.JAVASCRIPT
-    )
+    lang = detect_language(raw, language_hint=SupportedLanguage.JAVASCRIPT)
 
     assert lang is SupportedLanguage.JAVASCRIPT

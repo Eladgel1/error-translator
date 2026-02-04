@@ -3,29 +3,30 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
+from app.api.routes.analyze import (
+    LanguageHint,
+    _render_prompt,
+    _resolve_language_hint,
+    get_ai_client,
+)
 from app.schemas.ai_response import AIResponse
-from app.services.analysis.normalize import normalize_error_text
-from app.services.analysis.detect_language import detect_language
 from app.services.ai.client import AIClient
 from app.services.ai.errors import (
+    AIClientError,
+    AIConfigurationError,
     AINetworkError,
     AIProviderError,
     AIResponseParseError,
     AIResponseValidationError,
-    AIConfigurationError,
-    AIClientError,
 )
-from app.api.routes.analyze import (
-    LanguageHint,
-    _resolve_language_hint,
-    _render_prompt,
-    get_ai_client,
-)
+from app.services.analysis.detect_language import detect_language
+from app.services.analysis.normalize import normalize_error_text
 
 router = APIRouter(tags=["followup"])
 
 
 # ---- Request models ----
+
 
 class FollowupRequest(BaseModel):
     """
@@ -45,10 +46,11 @@ class FollowupRequest(BaseModel):
     previous_response: AIResponse
 
     question: str = Field(..., min_length=1)
-    analysis_id: Optional[str] = None   # reserved for future stateful threads
+    analysis_id: Optional[str] = None  # reserved for future stateful threads
 
 
 # ---- Endpoint ----
+
 
 @router.post(
     "/followup",
@@ -83,7 +85,7 @@ async def followup_analysis(
         language_hint=hint_enum,
         detected_language=detected_language,
         normalized_error_text=normalize_text,
-        context=payload.context
+        context=payload.context,
     )
 
     previous_json = payload.previous_response.model_dump_json(indent=2)
@@ -123,7 +125,7 @@ IMPORTANT OUTPUT REQUIREMENTS:
   }}
 - Do NOT include any text outside the JSON.
 """
-    
+
     prompt = base_prompt + followup_block
 
     try:
@@ -133,25 +135,25 @@ IMPORTANT OUTPUT REQUIREMENTS:
             version=None,
         )
         return ai_response
-    
+
     except AIConfigurationError as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="AI provider is not properly configured.",
         ) from exc
-    
+
     except (AINetworkError, AIProviderError) as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Failed to reach AI provider.",
         ) from exc
-    
+
     except (AIResponseParseError, AIResponseValidationError) as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="AI returned an invalid or malformed response.",
         ) from exc
-    
+
     except AIClientError as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

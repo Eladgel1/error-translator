@@ -1,9 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
 from app.api.routes.analyze import get_ai_client
+from app.main import app
 from app.schemas.ai_response import AIResponse, SupportedLanguage
+from fastapi.testclient import TestClient
 
 
 class FakeAIClient:
@@ -16,7 +15,7 @@ class FakeAIClient:
 
     async def aclose(self) -> None:
         return
-    
+
     async def generate_response(
         self,
         *,
@@ -35,7 +34,7 @@ class FakeAIClient:
             followup_questions=["Integration test follow-up question"],
             confidence=0.9,
         )
-    
+
 
 @pytest.fixture(autouse=True)
 def override_ai_client_dependency():

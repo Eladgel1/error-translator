@@ -3,7 +3,6 @@ from typing import Dict
 
 from app.schemas.ai_response import SupportedLanguage
 
-
 # ---- Regex patterns per language ----
 
 # Python: classic traceback, .py files, Python-specific exception names
@@ -51,6 +50,7 @@ def _count_matches(text: str, patterns: list[re.Pattern[str]]) -> int:
         score += len(pattern.findall(text))
     return score
 
+
 def _score_languages_(text: str) -> Dict[SupportedLanguage, int]:
     """Return a score per language based on rexeg matches"""
     scores: Dict[SupportedLanguage, int] = {
@@ -60,20 +60,20 @@ def _score_languages_(text: str) -> Dict[SupportedLanguage, int]:
     }
     return scores
 
+
 def detect_language(
     error_text: str,
     language_hint: SupportedLanguage | None = None,
 ) -> SupportedLanguage:
-    
     """
     Detect the most likely language od the error text.
     """
     if language_hint is not None and language_hint is not SupportedLanguage.UNKNOWN:
         return language_hint
-    
+
     if not error_text or not error_text.strip():
         return SupportedLanguage.UNKNOWN
-    
+
     text = error_text
 
     scores = _score_languages_(text)
@@ -81,5 +81,5 @@ def detect_language(
 
     if best_score <= 0:
         return SupportedLanguage.UNKNOWN
-    
+
     return best_lang

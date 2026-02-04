@@ -99,8 +99,9 @@ def test_normalize_handles_empty_string_gracefully():
     # Should not crash and should return a string (possibly empty)
     assert isinstance(result, str)
 
+
 def test_normalize_does_not_raise_on_control_chars():
-    raw ="Error:\x00\x01 Something went wrong\t\tagain"
+    raw = "Error:\x00\x01 Something went wrong\t\tagain"
     result = normalize_error_text(raw)
 
     # Still a string, and core words are preserved
