@@ -1,7 +1,7 @@
 import { AnalyzerPage } from "./pages/AnalyzerPage";
 
 function App() {
-  return <AnalyzerPage />
+  return <AnalyzerPage />;
 }
 
 export default App;
