@@ -24,7 +24,15 @@ help:
     @echo "  just test                  - Run all tests (backend only)"
     @echo "  just lint                  - Run all linters (backend only)"
     @echo ""
-    @echo "Tip: activate virtualenv first:"
+    @echo "  just frontend-dev          - Run frontend dev server (Vite)"
+    @echo "  just test-frontend         - Run frontend unit tests (Vitest)"
+    @echo "  just test-frontend-e2e     - Run frontend E2E tests (Playwright)"
+    @echo "  just lint-frontend         - Run frontend linter (ESLint)"
+    @echo "  just format-frontend       - Format frontend code (Prettier)"
+    @echo "  just build-frontend        - Build frontend for production"
+    @echo "  just install-frontend      - Install frontend dependencies"
+    @echo ""
+    @echo "Tip: activate backend virtualenv first:"
     @echo "  cd backend && .\\.venv\\Scripts\\Activate.ps1"
 
 # -----------------------------------------
@@ -58,5 +66,44 @@ format-backend:
 # GLOBAL ALIASES
 # -----------------------------------------
 test: test-backend
-
 lint: lint-backend
+
+# =========================================
+# FRONTEND COMMANDS (ADDED)
+# =========================================
+
+# -----------------------------------------
+# FRONTEND DEV SERVER
+# -----------------------------------------
+frontend-dev:
+    cd {{FRONTEND_DIR}} && npm run dev
+
+# -----------------------------------------
+# FRONTEND INSTALL
+# -----------------------------------------
+install-frontend:
+    cd {{FRONTEND_DIR}} && npm install
+
+# -----------------------------------------
+# FRONTEND BUILD
+# -----------------------------------------
+build-frontend:
+    cd {{FRONTEND_DIR}} && npm run build
+
+# -----------------------------------------
+# FRONTEND TESTS
+# -----------------------------------------
+test-frontend:
+    cd {{FRONTEND_DIR}} && npm run test
+    
+# -----------------------------------------
+# FRONTEND LINTER (ESLINT)
+# -----------------------------------------
+lint-frontend:
+    cd {{FRONTEND_DIR}} && npm run lint
+
+# -----------------------------------------
+# FRONTEND FORMATTER (PRETTIER)
+# -----------------------------------------
+format-frontend:
+    cd {{FRONTEND_DIR}} && npm run format
