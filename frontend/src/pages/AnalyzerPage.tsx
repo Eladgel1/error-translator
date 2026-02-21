@@ -1,7 +1,9 @@
+/* eslint-disable camelcase */
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import type { AIResponse, ApiError, LanguageHint } from "../types/ai";
 import { analyzeError } from "../api/client";
+import type { HistoryEntry } from "../features/history/types";
 import {
   Loader2,
   Copy as CopyIcon,
@@ -15,11 +17,6 @@ import {
   EXAMPLE_PRESETS,
   type ExamplePreset,
 } from "../features/examples/examplePresets";
-
-import type {
-  HistoryEntry,
-  HistoryInput,
-} from "../features/history/types";
 
 import {
   loadHistory,
@@ -278,7 +275,9 @@ export function AnalyzerPage() {
       await navigator.clipboard.writeText(content);
       setCopyState("copied");
       setTimeout(() => setCopyState("idle"), 4000);
-    } catch {}
+    } catch {
+      console.log("An unexpected error occurred...");
+    }
   }
 
   function handleClear() {
@@ -333,10 +332,10 @@ export function AnalyzerPage() {
               <div
                 className={`relative max-w-[80%] whitespace-pre-wrap rounded-xl px-4 py-3 text-sm leading-relaxed shadow-md transition-all
                   ${
-                    msg.role === "user"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-800 text-slate-100 border border-slate-700"
-                  }
+            msg.role === "user"
+              ? "bg-indigo-600 text-white"
+              : "bg-slate-800 text-slate-100 border border-slate-700"
+            }
                 `}
               >
                 <div className="prose prose-invert text-sm">
@@ -396,7 +395,7 @@ export function AnalyzerPage() {
                 className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-200 transition"
               >
                 <Trash2 className="h-3 w-3" />
-                Clear history
+                Clear History
               </button>
             )}
           </div>
