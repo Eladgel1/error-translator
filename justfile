@@ -2,6 +2,9 @@
 # JUSTFILE - Developer commands for error-translator monorepo
 # =========================================
 
+# Force Just to use Windows cmd.exe
+set windows-shell := ["cmd.exe", "/C"]
+
 # Directory variables
 BACKEND_DIR := "backend"
 FRONTEND_DIR := "frontend"
