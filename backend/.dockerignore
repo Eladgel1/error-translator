@@ -1,0 +1,37 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment files (do not bake secrets into the image)
+.env
+.env.*
+!.env.example
+
+# Test and tooling artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
+
+# Git and IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node or frontend artifacts (if any accidentally appear in context)
+node_modules/
+dist/
+
+# Tests directory is not needed in the runtime image
+tests/

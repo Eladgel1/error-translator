@@ -34,6 +34,8 @@ help:
     @echo "  just format-frontend       - Format frontend code (Prettier)"
     @echo "  just build-frontend        - Build frontend for production"
     @echo "  just install-frontend      - Install frontend dependencies"
+    @echo "  just build-backend-docker  - Build backend Docker image"
+    @echo "  just run-backend-docker    - Run backend Docker container with local .env" 
     @echo ""
     @echo "Tip: activate backend virtualenv first:"
     @echo "  cd backend && .\\.venv\\Scripts\\Activate.ps1"
@@ -64,6 +66,16 @@ lint-backend:
 # -----------------------------------------
 format-backend:
     cd {{BACKEND_DIR}} && ruff format app tests
+
+# -----------------------------------------
+# BACKEND DOCKER
+# -----------------------------------------
+
+build-backend-docker:
+    docker build -t error-translator-backend -f backend/Dockerfile backend
+
+run-backend-docker:
+    docker run -d --rm -p 8000:8000 --env-file backend/.env error-translator-backend
 
 # -----------------------------------------
 # GLOBAL ALIASES
