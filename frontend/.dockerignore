@@ -1,0 +1,35 @@
+# Node modules and build artifacts
+node_modules/
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Tests and coverage
+coverage/
+tests/
+playwright-report/
+test-results/
+
+# Git metadata
+.git/
+.gitignore
