@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: error-translator-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: error-translator-backend:local
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    # The backend Dockerfile already defines a HEALTHCHECK on /health
+    # so docker-compose will be able to track service health.
+    restart: unless-stopped
+  
+  frontend:
+    container_name: error-translator-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # IMPORTANT: use the Docker service name "backend" here,
+        # not localhost, so containers can talk over the Docker network.
+        VITE_API_BASE_URL: "http://localhost:8000"
+    image: error-translator-frontend:local
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+    restart: unless-stopped

@@ -38,9 +38,13 @@ help:
     @echo "  just build-backend-docker        - Build backend Docker image"
     @echo "  just run-backend-docker          - Run backend Docker container with local .env"
     @echo "  just build-frontend-docker-dev   - Build frontend Docker image for development"
-    @echo "  just run-frontned-docker-dev     - Run frontend Docker container for development"
+    @echo "  just run-frontend-docker-dev     - Run frontend Docker container for development"
     @echo "  just build-frontend-docker-prod  - Build frontend Docker image for production"
-    @echo "  Just run-frontend-docker-prod    - Run frontend Docker container for production"
+    @echo "  just run-frontend-docker-prod    - Run frontend Docker container for production"
+    @echo ""
+    @echo "  just compose-up                  - Build and start the full stack locally (frontend + backend)"
+    @echo "  just compose-up-detached         - Build and start the full stack in detached mode"
+    @echo "  just compose-down                - Stop and remove the full Docker Compose stack"
     @echo ""
     @echo "Tip: activate backend virtualenv first:"
     @echo "  cd backend && .\\.venv\\Scripts\\Activate.ps1"
@@ -147,3 +151,16 @@ build-frontend-docker-prod:
 # Run frontend Docker container for prod
 run-frontend-docker-prod:
     cd {{FRONTEND_DIR}} && npm run docker:run:prod
+
+# =========================================
+# DOCKER COMPOSE - LOCAL FULL STACK
+# =========================================
+
+compose-up:
+    docker compose up --build
+
+compose-up-detached:
+    docker compose up -d --build
+
+compose-down:
+    docker compose down
