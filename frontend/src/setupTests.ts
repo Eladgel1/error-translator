@@ -8,7 +8,6 @@ interface ClipboardMock {
 
 // Ensure navigator exists before mocking
 if (typeof navigator === "undefined") {
-  // @ts-expect-error - create minimal navigator stub
   global.navigator = {} as Navigator;
 }
 
