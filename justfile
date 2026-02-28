@@ -19,23 +19,28 @@ default:
 help:
     @echo ""
     @echo "Available commands:"
-    @echo "  just backend-dev           - Run backend dev server (requires venv)"
-    @echo "  just test-backend          - Run backend tests (pytest)"
-    @echo "  just test-backend-cov      - Run backend tests with coverage"
-    @echo "  just lint-backend          - Run backend linter (ruff check)"
-    @echo "  just format-backend        - Format backend code (ruff format)"
-    @echo "  just test                  - Run all tests (backend only)"
-    @echo "  just lint                  - Run all linters (backend only)"
+    @echo "  just backend-dev                 - Run backend dev server (requires venv)"
+    @echo "  just test-backend                - Run backend tests (pytest)"
+    @echo "  just test-backend-cov            - Run backend tests with coverage"
+    @echo "  just lint-backend                - Run backend linter (ruff check)"
+    @echo "  just format-backend              - Format backend code (ruff format)"
+    @echo "  just test                        - Run all tests (backend only)"
+    @echo "  just lint                        - Run all linters (backend only)"
     @echo ""
-    @echo "  just frontend-dev          - Run frontend dev server (Vite)"
-    @echo "  just test-frontend         - Run frontend unit tests (Vitest)"
-    @echo "  just test-frontend-e2e     - Run frontend E2E tests (Playwright)"
-    @echo "  just lint-frontend         - Run frontend linter (ESLint)"
-    @echo "  just format-frontend       - Format frontend code (Prettier)"
-    @echo "  just build-frontend        - Build frontend for production"
-    @echo "  just install-frontend      - Install frontend dependencies"
-    @echo "  just build-backend-docker  - Build backend Docker image"
-    @echo "  just run-backend-docker    - Run backend Docker container with local .env" 
+    @echo "  just frontend-dev                - Run frontend dev server (Vite)"
+    @echo "  just test-frontend               - Run frontend unit tests (Vitest)"
+    @echo "  just test-frontend-e2e           - Run frontend E2E tests (Playwright)"
+    @echo "  just lint-frontend               - Run frontend linter (ESLint)"
+    @echo "  just format-frontend             - Format frontend code (Prettier)"
+    @echo "  just build-frontend              - Build frontend for production"
+    @echo "  just install-frontend            - Install frontend dependencies"
+    @echo ""
+    @echo "  just build-backend-docker        - Build backend Docker image"
+    @echo "  just run-backend-docker          - Run backend Docker container with local .env"
+    @echo "  just build-frontend-docker-dev   - Build frontend Docker image for development"
+    @echo "  just run-frontned-docker-dev     - Run frontend Docker container for development"
+    @echo "  just build-frontend-docker-prod  - Build frontend Docker image for production"
+    @echo "  Just run-frontend-docker-prod    - Run frontend Docker container for production"
     @echo ""
     @echo "Tip: activate backend virtualenv first:"
     @echo "  cd backend && .\\.venv\\Scripts\\Activate.ps1"
@@ -122,3 +127,23 @@ lint-frontend:
 # -----------------------------------------
 format-frontend:
     cd {{FRONTEND_DIR}} && npm run format
+
+# =========================================
+# FRONTEND DOCKER
+# =========================================
+
+# Build frontend Docker image for dev
+build-frontend-docker-dev:
+    cd {{FRONTEND_DIR}} && npm run docker:build:dev
+
+# Run frontend Docker container for dev
+run-frontend-docker-dev:
+    cd {{FRONTEND_DIR}} && npm run docker:run:dev
+
+# Build frontend Docker image for prod
+build-frontend-docker-prod:
+    cd {{FRONTEND_DIR}} && npm run docker:build:prod
+
+# Run frontend Docker container for prod
+run-frontend-docker-prod:
+    cd {{FRONTEND_DIR}} && npm run docker:run:prod

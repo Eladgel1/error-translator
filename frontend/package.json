@@ -14,7 +14,11 @@
     "test:unit:run": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "docker:build:dev": "docker build -t error-translator-frontend:dev --build-arg VITE_API_BASE_URL=http://localhost:8000 -f Dockerfile .",
+    "docker:run:dev": "docker run -d --rm -p 5173:80 error-translator-frontend:dev",
+    "docker:build:prod": "docker build -t error-translator-frontend:prod --build-arg VITE_API_BASE_URL=https://api.error-translator.example.com -f Dockerfile .",
+    "docker:run:prod": "docker run -d --rm -p 5173:80 error-translator-frontend:prod"
   },
   "dependencies": {
     "lucide-react": "^0.563.0",
