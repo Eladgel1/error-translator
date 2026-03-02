@@ -1,6 +1,17 @@
+[project]
+name = "error-translator-backend"
+version = "0.1.0"
+description = "Error Translator FastAPI backend"
+requires-python = ">=3.12"
+
+# NOTE:
+# We intentionally do NOT define dependencies here because this project currently
+# installs dependencies from requirements.txt.
+dependencies = []
+
 [tool.ruff]
-line-length=100
-target-version= "py312"
+line-length = 100
+target-version = "py312"
 src = ["app", "tests"]
 select = ["E", "F", "I"]
 ignore = []
@@ -13,4 +24,3 @@ fix = true
 testpaths = ["tests"]
 python_files = "test_*.py"
 asyncio_mode = "auto"
-
