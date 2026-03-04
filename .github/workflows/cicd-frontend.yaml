@@ -70,3 +70,10 @@ jobs:
           name: error-translator-frontend-ci-image
           path: error-translator-frontend-ci.tar
           if-no-files-found: error
+
+      - name: Trigger Vercel deploy (Frontend)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main')
+        run: |
+          curl -fsS -X POST "$VERCEL_FRONTEND_DEPLOY_HOOK"
+        env:
+          VERCEL_FRONTEND_DEPLOY_HOOK: ${{ secrets.VERCEL_FRONTEND_DEPLOY_HOOK }}  

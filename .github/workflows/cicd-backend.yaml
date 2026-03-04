@@ -69,4 +69,11 @@ jobs:
           name: error-translator-backend-ci-image
           path: error-translator-backend-ci.tar
           if-no-files-found: error  
+
+      - name: Trigger Vercel deploy (Backend)
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main')
+        run: |
+          curl -fsS -X POST "$VERCEL_BACKEND_DEPLOY_HOOK"
+        env:
+          VERCEL_BACKEND_DEPLOY_HOOK: ${{ secrets.VERCEL_BACKEND_DEPLOY_HOOK }}  
               
