@@ -369,7 +369,7 @@ export function AnalyzerPage() {
                   <div
                     className={`relative max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md shadow-slate-950/60 transition-all ${
                       msg.role === "user"
-                        ? "bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 text-white"
+                        ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
                         : "bg-slate-900/90 text-slate-100 border border-slate-700/80"
                     }`}
                   >
@@ -409,7 +409,9 @@ export function AnalyzerPage() {
 
           {/* Error banner */}
           {uiError && (
-            <div className="rounded-2xl border border-red-500/60 bg-red-950/60 p-3 text-sm text-red-100 shadow-lg shadow-red-900/60">
+            <div className="rounded-2xl border border-red-500/60 bg-red-950/60 p-3 text-sm text-red-100 shadow-lg shadow-red-900/60"
+              role="alert"
+            >
               <p className="font-semibold">{uiError.title}</p>
               <p className="mt-1 text-xs text-red-100/90">{uiError.message}</p>
             </div>
@@ -510,7 +512,7 @@ export function AnalyzerPage() {
                   Language hint
                 </label>
                 <select
-                  className="rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
+                  className="rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40 cursor-pointer"
                   value={form.languageHint}
                   onChange={(e) =>
                     setForm((p) => ({

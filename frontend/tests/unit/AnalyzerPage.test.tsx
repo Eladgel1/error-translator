@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { render, screen, waitFor } from "@testing-library/react";
+import { findAllByAltText, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AnalyzerPage } from "../../src/pages/AnalyzerPage";
 import type { AIResponse } from "../../src/types/ai";
@@ -88,7 +88,8 @@ describe("AnalyzerPage Component", () => {
     await user.click(analyzeButton);
 
     // UI error banner should show mapped text
-    expect(await screen.findByText(/Invalid Input/i)).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/Invalid Input/i);
   });
 
   it("copies assistant message content when copy button is clicked", async () => {
