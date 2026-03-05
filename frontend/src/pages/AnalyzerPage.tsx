@@ -423,16 +423,16 @@ export function AnalyzerPage() {
                 History
               </h2>
 
-            {history.length > 0 && (
-              <button
-                type="button"
-                onClick={handleClearHistory}
-                className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-emerald-300 transition hover:bg-slate-800 hover:text-emerald-200"
-              >
-                <Trash2 className="h-3 w-3" />
+              {history.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearHistory}
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-emerald-300 transition hover:bg-slate-800 hover:text-emerald-200"
+                >
+                  <Trash2 className="h-3 w-3" />
                 Clear History
-              </button>
-            )}
+                </button>
+              )}
             </div>
 
             {history.length === 0 ? (
