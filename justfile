@@ -24,8 +24,6 @@ help:
     @echo "  just test-backend-cov            - Run backend tests with coverage"
     @echo "  just lint-backend                - Run backend linter (ruff check)"
     @echo "  just format-backend              - Format backend code (ruff format)"
-    @echo "  just test                        - Run all tests (backend only)"
-    @echo "  just lint                        - Run all linters (backend only)"
     @echo ""
     @echo "  just frontend-dev                - Run frontend dev server (Vite)"
     @echo "  just test-frontend               - Run frontend unit tests (Vitest)"
@@ -86,14 +84,8 @@ build-backend-docker:
 run-backend-docker:
     docker run -d --rm -p 8000:8000 --env-file backend/.env error-translator-backend
 
-# -----------------------------------------
-# GLOBAL ALIASES
-# -----------------------------------------
-test: test-backend
-lint: lint-backend
-
 # =========================================
-# FRONTEND COMMANDS (ADDED)
+# FRONTEND COMMANDS
 # =========================================
 
 # -----------------------------------------
