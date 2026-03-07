@@ -19,6 +19,9 @@ venv/
 .coverage
 htmlcov/
 
+# --- Linter ---
+.ruff_cache
+
 # --- Node / Frontend ---
 node_modules/
 dist/
