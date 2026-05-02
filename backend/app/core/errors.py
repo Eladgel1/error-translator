@@ -5,6 +5,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.core.logging import get_logger
+from app.services.ai.errors import (
+    AIClientError,
+    AIConfigurationError,
+    AINetworkError,
+    AIProviderError,
+    AIResponseParseError,
+    AIResponseValidationError,
+)
 
 logger = get_logger("error-translator.errors")
 
@@ -115,6 +123,84 @@ def init_error_handlers(app: FastAPI) -> None:
             code="validation_error",
             message="Request validation failed",
             details={"errors": exc.errors()},
+        )
+    
+    @app.exception_handler(AIConfigurationError)
+    async def handle_ai_configuration_error(
+        request: Request, exc: AIConfigurationError
+    ) -> JSONResponse:
+        logger.error(
+            "AI configuaration error",
+            extra={
+                "path": request.url.path,
+                "request_id": getattr(request.state, "request_id", None),
+            },
+        )
+
+        return _build_error_response(
+            request,
+            status_code=500,
+            code="ai_configuration_error",
+            message="AI provider is not properly configured.",
+        )
+    
+    @app.exception_handler(AINetworkError)
+    @app.exception_handler(AIProviderError)
+    async def handle_ai_provider_error(
+        request: Request, exc: AIClientError
+    ) -> JSONResponse:
+        logger.warning(
+            "AI provider error.",
+            extra={
+                "path": request.url.path,
+                "request_id": getattr(request.state, "request_id", None),
+            },
+        )
+
+        return _build_error_response(
+            request,
+            status_code=502,
+            code="ai_provider_error",
+            message="Failed to reach AI provider",
+        )
+    
+    @app.exception_handler(AIResponseParseError)
+    @app.exception_handler(AIResponseValidationError)
+    async def handle_ai_response_error(
+        request: Request, exc: AIClientError
+    ) -> JSONResponse:
+        logger.warning(
+            "AI response error",
+            extra={
+                "path": request.url.path,
+                "request_id": getattr(request.state, "request_id", None),
+            },
+        )
+
+        return _build_error_response(
+            request,
+            status_code=502,
+            code="ai_invalid_response",
+            message="AI returned an invalid or malformed response.",
+        )
+    
+    @app.exception_handler(AIClientError)
+    async def handle_ai_client_error(
+        request: Request, exc: AIClientError
+    ) -> JSONResponse:
+        logger.error(
+            "Unexpected AI client error",
+            extra={
+                "path": request.url.path,
+                "request_id": getattr(request.state, "request_id", None),
+            },
+        )
+
+        return _build_error_response(
+            request,
+            status_code=500,
+            code="ai_client_error",
+            message="Unexpected AI client failure."
         )
 
     @app.exception_handler(Exception)

@@ -1,10 +1,13 @@
 import logging
+import sys
 from logging import Logger
+
+from app.core.config import settings
 
 LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 
 
-def configure_logging(level: int = logging.info) -> None:
+def configure_logging() -> None:
     """
     Configure root logging for the application.
 
@@ -12,8 +15,10 @@ def configure_logging(level: int = logging.info) -> None:
     """
 
     logging.basicConfig(
-        level=level,
+        level=settings.log_level.upper(),
         format=LOG_FORMAT,
+        handlers=[logging.StreamHandler(sys.stdout)],
+        force=True,
     )
 
 

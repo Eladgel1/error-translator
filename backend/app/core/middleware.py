@@ -7,19 +7,25 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
+from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger("error-translator.middleware")
 
+def get_cors_origins() -> list[str]:
+    """
+    Parse allowed CORS origins from configuration.
 
-# ---- CORS ----
+    The value is expected to be a comma-separated string.
+    Example:
+    CORS_ORIGINS=http://localhost:5173,https://error-translator.vercel.app
+    """
 
-DEFAULT_CORS_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://error-translator.vercel.app"
-]
-
+    return [
+        origin.strip()
+        for origin in settings.cors_origins.split(",")
+        if origin.strip()
+    ]
 
 # ---- Request context ----
 
@@ -52,10 +58,10 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         return response
 
 
-# ---- Simple in-memory rate Limiter (pre-process) ----
+# ---- Simple in-memory rate Limiter ----
 
 
-class ReateLimitMiddleWare(BaseHTTPMiddleware):
+class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: FastAPI,
@@ -116,7 +122,7 @@ def init_middlewares(app: FastAPI) -> None:
     # CORS for frontend
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=DEFAULT_CORS_ORIGINS,
+        allow_origins=get_cors_origins(),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -126,4 +132,4 @@ def init_middlewares(app: FastAPI) -> None:
     app.add_middleware(RequestContextMiddleware)
 
     # Rate limiting
-    app.add_middleware(ReateLimitMiddleWare)
+    app.add_middleware(RateLimitMiddleware)

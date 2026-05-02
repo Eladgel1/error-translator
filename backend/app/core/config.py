@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     app_name: str = "Error Translator API"
     environment: str = "local"
     debug: bool = True
+    log_level: str = "INFO"
+    cors_origins: str = (
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://error-translator.vercel.app"
+    )
 
     # --- AI client configuration ---
     ai_provider: Literal["gemini", "dummy"] = "gemini"
