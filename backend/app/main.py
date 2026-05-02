@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 
-from .api.routes.analyze import router as analyze_router
-from .api.routes.followup import router as followup_router
 from .core.config import settings
 from .core.errors import init_error_handlers
 from .core.middleware import init_middlewares
+from .modules.analysis.router import router as analyze_router
+from .modules.followups.router import router as followup_router
 
 
 def create_app() -> FastAPI:

@@ -1,6 +1,6 @@
 import pytest
-from app.api.routes.analyze import get_ai_client
 from app.main import app
+from app.modules.analysis.dependencies import get_ai_client
 from app.schemas.ai_response import AIResponse, SupportedLanguage
 from fastapi.testclient import TestClient
 

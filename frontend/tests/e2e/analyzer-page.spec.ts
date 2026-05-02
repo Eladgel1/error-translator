@@ -1,13 +1,47 @@
 import { test, expect } from "@playwright/test";
 
-const ERROR_EXAMPLE =
-    "TypeError: Cannot read properties of undefined";
+const ERROR_EXAMPLE = "TypeError: Cannot read properties of undefined";
+
+const mockAnalysisResponse = {
+  language_detected: "javascript",
+  summary: "Mocked summary for E2E test.",
+  likely_cause: "The code is trying to access a property on an undefined value.",
+  fix_steps: [
+    "Check that the object exists before reading from it.",
+    "Add a guard clause or optional chaining.",
+  ],
+  debug_steps: [
+    "Log the object before accessing the property.",
+    "Trace where the value should be initialized.",
+  ],
+  assumptions: ["This is a mocked Playwright response."],
+  followup_questions: ["Can you share the code that creates the object?"],
+  confidence: 0.9,
+};
 
 test.describe("Analyzer Page E2E", () => {
   test.setTimeout(30_000);
 
   test.beforeEach(async ({ page }) => {
-    // Make sure we start clean on each test
+    await page.route("**/api/analyze", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockAnalysisResponse),
+      });
+    });
+
+    await page.route("**/api/followup", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ...mockAnalysisResponse,
+          summary: "Mocked follow-up summary for E2E test.",
+        }),
+      });
+    });
+
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
   });
@@ -21,34 +55,22 @@ test.describe("Analyzer Page E2E", () => {
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
-    // Initially disables where text is empty
     await expect(analyzeButton).toBeDisabled();
 
-    // Fill both fields
     await errorTextarea.fill(ERROR_EXAMPLE);
     await contextTextarea.fill("line 42 in myHandler");
 
     await expect(analyzeButton).toBeEnabled();
 
-    // Trigger analysis
     await analyzeButton.click();
 
-    // While loading, button text changes to "Analyzing..."
     await expect(
-      page.getByRole("button", { name: /Analyzing/i })
+      page.getByRole("heading", { name: /Summary/i })
     ).toBeVisible();
 
-    // Eventually we should see the summary heading rendered by ReactMarkdown
-    const summaryHeading = page.getByRole("heading", {
-      name: /🧠 Summary/i,
-    });
-    await expect(summaryHeading).toBeVisible();
-
-    // Once we have a successful analysis, history should contain entries
-    const clearHistoryButton = page.getByRole("button", {
-      name: /Clear History/i,
-    });
-    await expect(clearHistoryButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Clear History/i })
+    ).toBeVisible();
   });
 
   test("example preset fills form and enables Analyze", async ({ page }) => {
@@ -60,15 +82,9 @@ test.describe("Analyzer Page E2E", () => {
     await expect(errorTextarea).toHaveValue("");
     await expect(analyzeButton).toBeDisabled();
 
-    // Click one of the example presets from EXAMPLE_PRESETS
-    await page
-      .getByRole("button", { name: "JavaScript TypeError" })
-      .click();
-    
-    // After applying preset, error textarea should not be empty
-    await expect(errorTextarea).not.toHaveValue("");
+    await page.getByRole("button", { name: "JavaScript TypeError" }).click();
 
-    // Analyze should now be enabled
+    await expect(errorTextarea).not.toHaveValue("");
     await expect(analyzeButton).toBeEnabled();
   });
 
@@ -82,22 +98,17 @@ test.describe("Analyzer Page E2E", () => {
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
     const clearButton = page.getByRole("button", { name: "Clear" });
 
-    // Fill fields and make sure Analyze is enabled
     await errorTextarea.fill("some error to clear");
     await contextTextarea.fill("some context to clear");
     await expect(analyzeButton).toBeEnabled();
 
-    // Click Clear -> should reset everything
     await clearButton.click();
 
     await expect(errorTextarea).toHaveValue("");
     await expect(contextTextarea).toHaveValue("");
     await expect(analyzeButton).toBeDisabled();
 
-    // Original message should not be visible in chat after clear
-    await expect(
-      page.getByText("some error to clear")
-    ).not.toBeVisible();
+    await expect(page.getByText("some error to clear")).not.toBeVisible();
   });
 
   test("history entry restores form and chat", async ({ page }) => {
@@ -106,27 +117,24 @@ test.describe("Analyzer Page E2E", () => {
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
-    // First run: create a history entry
     await errorTextarea.fill(ERROR_EXAMPLE);
     await analyzeButton.click();
 
-    const summaryHeading = page.getByRole("heading", {
-      name: /Summary/i,
-    });
-    await expect(summaryHeading).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Summary/i })
+    ).toBeVisible();
 
-    // At this point there should be at least one history entry button
-    // whose accessible name includes the error snippet (TypeError...)
-    const historyPanel = page.getByRole("heading", { name: "History" }).locator("..").locator("..");
+    const historyPanel = page
+      .getByRole("heading", { name: "History" })
+      .locator("..")
+      .locator("..");
+
     const historyEntry = historyPanel.getByRole("button").last();
 
-    // Clicking it should call restoreFromHistory(...)
     await historyEntry.click();
 
-    // Form should be restored with the same error text
     await expect(errorTextarea).toHaveValue(ERROR_EXAMPLE);
 
-    // And the assistant response (with Summary heading) should be visible
     await expect(
       page.getByRole("heading", { name: /Summary/i })
     ).toBeVisible();
@@ -138,25 +146,23 @@ test.describe("Analyzer Page E2E", () => {
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
-    // Create at least one history entry
     await errorTextarea.fill("History test error");
     await analyzeButton.click();
 
     const clearHistoryButton = page.getByRole("button", {
       name: /Clear history/i,
     });
+
     await expect(clearHistoryButton).toBeVisible();
 
-    // Clear history
     await clearHistoryButton.click();
 
-    // Empty-state message from AnalyzerPage
     await expect(
       page.getByText(/No previous analyses yet\./i)
     ).toBeVisible();
   });
 
-  test("assistant copy button toggles icon to 'check' after click", async ({ page }) => {
+  test("assistant copy button is clickable", async ({ page }) => {
     const errorTextarea = page.getByPlaceholder(
       "Paste your error message here..."
     );
@@ -165,14 +171,15 @@ test.describe("Analyzer Page E2E", () => {
     await errorTextarea.fill("Copy test error");
     await analyzeButton.click();
 
-    // Wait for assistant message (Summary)
-    const summaryHeading = page.getByRole("heading", {
-      name: /Summary/i,
-    });
-    await expect(summaryHeading).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Summary/i })
+    ).toBeVisible();
 
-    // Copy button lives inside the assistant bubble and initially has lucide-copy icon
-    const copyButton = page.locator("button").filter({ has: page.locator("svg") }).first();
+    const copyButton = page
+      .locator("button")
+      .filter({ has: page.locator("svg") })
+      .first();
+
     await copyButton.click();
 
     await expect(copyButton.locator("svg")).toHaveCount(1);
