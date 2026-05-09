@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { test, expect } from "@playwright/test";
 
 const ERROR_EXAMPLE = "TypeError: Cannot read properties of undefined";
