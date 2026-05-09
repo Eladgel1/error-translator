@@ -26,6 +26,13 @@ jobs:
       GEMINI_API_KEY: "dummy-ci-key"
       AI_REQUEST_TIMEOUT_SECONDS: "15"
       AI_MAX_RETRIES: "2"
+      POSTGRES_DB: error_translator_test
+      POSTGRES_USER: DB_USER
+      POSTGRES_PASSWORD: DB_PASSWORD
+      DATABASE_URL: postgresql+asyncpg://DB_USER:DB_PASSWORD@DB_HOST:5432/error_translator_test
+      JWT_SECRET_KEY: dummy-ci-secret-key
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 60
 
     defaults:
       run:
