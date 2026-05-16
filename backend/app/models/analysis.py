@@ -9,6 +9,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -48,6 +49,14 @@ class Analysis(Base):
     summary: Mapped[str]
 
     likely_cause: Mapped[str]
+
+    fix_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+
+    debug_steps: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+
+    assumptions: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+
+    followup_questions: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
 
     confidence: Mapped[float] = mapped_column(Float)
 
