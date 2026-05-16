@@ -31,6 +31,11 @@ class Settings(BaseSettings):
 
     database_url: str = Field(alias="DATABASE_URL")
 
+    migration_database_url: str | None = Field(
+        default=None,
+        alias="MIGRATION_DATABASE_URL",
+    )
+
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60
