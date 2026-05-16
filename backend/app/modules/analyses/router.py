@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from app.modules.analysis.dependencies import get_ai_client
-from app.modules.analysis.schemas import AnalyzeRequest
-from app.modules.analysis.service import analyze_error_message
+from app.modules.analyses.dependencies import get_ai_client
+from app.modules.analyses.schemas import AnalyzeRequest
+from app.modules.analyses.service import analyze_error_message
 from app.schemas.ai_response import AIResponse
 from app.services.ai.client import AIClient
 

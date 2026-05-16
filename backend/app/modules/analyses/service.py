@@ -1,7 +1,7 @@
 from typing import Optional
 
-from app.modules.analysis.prompting import render_analysis_prompt
-from app.modules.analysis.schemas import AnalyzeRequest, LanguageHint
+from app.modules.analyses.prompting import render_analysis_prompt
+from app.modules.analyses.schemas import AnalyzeRequest, LanguageHint
 from app.schemas.ai_response import AIResponse, SupportedLanguage
 from app.services.ai.client import AIClient
 from app.services.ai.prompts.registry import PromptVersion
