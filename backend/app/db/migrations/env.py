@@ -9,7 +9,17 @@ from sqlalchemy import engine_from_config, pool
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+def get_migration_database_url() -> str:
+    if settings.migration_database_url:
+        return settings.migration_database_url
+
+    return settings.database_url.replace(
+        "postgresql+asyncpg://",
+        "postgresql+psycopg://",
+    )
+
+
+config.set_main_option("sqlalchemy.url", get_migration_database_url())
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
