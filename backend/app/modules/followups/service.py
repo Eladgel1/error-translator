@@ -1,5 +1,5 @@
-from app.modules.analysis.prompting import render_analysis_prompt
-from app.modules.analysis.service import resolve_language_hint
+from app.modules.analyses.prompting import render_analysis_prompt
+from app.modules.analyses.service import resolve_language_hint
 from app.modules.followups.schemas import FollowupRequest
 from app.schemas.ai_response import AIResponse
 from app.services.ai.client import AIClient
