@@ -17,7 +17,7 @@ class AnalysisMessage(Base):
     )
 
     analysis_id: Mapped[str] = mapped_column(
-        ForeignKey("analysis.id", ondelete="CASCADE"),
+        ForeignKey("analyses.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
