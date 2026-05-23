@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import {
-  deleteAnalysis,
-  getAnalysis,
-  toggleFavorite,
-} from "../api/client";
+import { deleteAnalysis, getAnalysis, toggleFavorite } from "../api/client";
 import type { PersistedAnalysis } from "../features/analyses/types";
+import { formatLocalDateTime } from "../utils/date";
 
 export function AnalysisDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -68,103 +65,125 @@ export function AnalysisDetailsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
-      <section className="mx-auto max-w-4xl space-y-6">
-        <Link to="/dashboard" className="text-sm text-indigo-300">
-          ← Back to dashboard
-        </Link>
+    <section className="space-y-6">
+      <Link
+        to="/dashboard"
+        className="inline-flex text-sm font-medium text-indigo-300 transition hover:text-indigo-200"
+      >
+        ← Back to dashboard
+      </Link>
 
-        {isLoading && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-sm text-slate-300">
-            Loading analysis...
-          </div>
-        )}
+      {isLoading && (
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-300 shadow-lg shadow-slate-950/40">
+          Loading analysis...
+        </div>
+      )}
 
-        {errorMessage && (
-          <div
-            role="alert"
-            className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-200"
-          >
-            {errorMessage}
-          </div>
-        )}
+      {errorMessage && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-500/60 bg-red-950/60 p-4 text-sm text-red-100 shadow-lg shadow-red-900/40"
+        >
+          {errorMessage}
+        </div>
+      )}
 
-        {analysis && (
-          <article className="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-2xl">
-            <header className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-semibold">{analysis.title}</h1>
-                <p className="mt-2 text-sm text-slate-400">
-                  {analysis.language_detected} •{" "}
-                  {(analysis.confidence * 100).toFixed(1)}% confidence
-                </p>
-              </div>
+      {analysis && (
+        <article className="space-y-6 rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.7)] backdrop-blur-2xl sm:p-8">
+          <header className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <span className="rounded-full border border-indigo-400/40 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-200">
+                {analysis.language_detected}
+              </span>
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleToggleFavorite}
-                  className="rounded-xl border border-slate-700 px-4 py-2 text-sm transition hover:border-yellow-400"
-                >
-                  {analysis.is_favorite ? "Unfavorite" : "Favorite"}
-                </button>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-100 sm:text-4xl">
+                {analysis.title}
+              </h1>
 
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="rounded-xl border border-red-500/40 px-4 py-2 text-sm text-red-200 transition hover:bg-red-500/10"
-                >
-                  Delete
-                </button>
-              </div>
-            </header>
+              <p className="mt-2 text-sm text-slate-400">
+                Created {formatLocalDateTime(analysis.created_at)} •{" "}
+                {(analysis.confidence * 100).toFixed(1)}% confidence
+              </p>
+            </div>
 
-            <section>
-              <h2 className="text-lg font-semibold">Original Error</h2>
-              <pre className="mt-3 overflow-x-auto rounded-2xl bg-slate-950 p-4 text-sm text-slate-200">
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                className="rounded-xl border border-yellow-400/30 bg-yellow-500/10 px-4 py-2 text-sm font-medium text-yellow-100 transition hover:bg-yellow-500/15"
+              >
+                {analysis.is_favorite ? "Unfavorite" : "Favorite"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/15"
+              >
+                Delete
+              </button>
+            </div>
+          </header>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <h2 className="text-sm font-semibold text-slate-100">
+                Original Error
+              </h2>
+              <pre className="mt-3 max-h-80 overflow-x-auto whitespace-pre-wrap rounded-xl bg-slate-950/80 p-4 text-sm leading-6 text-slate-200">
                 {analysis.error_text}
               </pre>
             </section>
 
-            {analysis.context && (
-              <section>
-                <h2 className="text-lg font-semibold">Context</h2>
-                <pre className="mt-3 overflow-x-auto rounded-2xl bg-slate-950 p-4 text-sm text-slate-200">
-                  {analysis.context}
-                </pre>
-              </section>
-            )}
-
-            <section>
-              <h2 className="text-lg font-semibold">Summary</h2>
-              <p className="mt-2 text-slate-300">{analysis.summary}</p>
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+              <h2 className="text-sm font-semibold text-slate-100">Context</h2>
+              <pre className="mt-3 max-h-80 overflow-x-auto whitespace-pre-wrap rounded-xl bg-slate-950/80 p-4 text-sm leading-6 text-slate-200">
+                {analysis.context || "No additional context provided."}
+              </pre>
             </section>
+          </div>
 
-            <section>
-              <h2 className="text-lg font-semibold">Likely Cause</h2>
-              <p className="mt-2 text-slate-300">{analysis.likely_cause}</p>
-            </section>
+          <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+            <h2 className="text-sm font-semibold text-slate-100">Summary</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {analysis.summary}
+            </p>
+          </section>
 
-            <section>
-              <h2 className="text-lg font-semibold">Fix Steps</h2>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-300">
+          <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+            <h2 className="text-sm font-semibold text-slate-100">
+              Likely Cause
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {analysis.likely_cause}
+            </p>
+          </section>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+              <h2 className="text-sm font-semibold text-slate-100">
+                Fix Steps
+              </h2>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-300">
                 {analysis.fix_steps.map((step, index) => (
                   <li key={index}>{step}</li>
                 ))}
               </ol>
             </section>
 
-            <section>
-              <h2 className="text-lg font-semibold">Debug Steps</h2>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-slate-300">
+            <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+              <h2 className="text-sm font-semibold text-slate-100">
+                Debug Steps
+              </h2>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-300">
                 {analysis.debug_steps.map((step, index) => (
                   <li key={index}>{step}</li>
                 ))}
               </ol>
             </section>
-          </article>
-        )}
-      </section>
-    </main>
+          </div>
+        </article>
+      )}
+    </section>
   );
 }
