@@ -36,6 +36,11 @@ class Settings(BaseSettings):
         alias="MIGRATION_DATABASE_URL",
     )
 
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        alias="REDIS_URL",
+    )
+
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60
