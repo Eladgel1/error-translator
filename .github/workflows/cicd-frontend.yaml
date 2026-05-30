@@ -42,6 +42,9 @@ jobs:
         run: |
           npm run lint
 
+      - name: Install Playwright browsers for E2E tests
+        run: npx playwright install --with-deps
+
       - name: Run frontend tests 
         run: |
           npm run test
