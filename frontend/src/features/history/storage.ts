@@ -1,20 +1,23 @@
-import { HISTORY_STORAGE_KEY, HISTROTY_MAX_ITEMS, type HistoryEntry } from "./types";
-
+import {
+  HISTORY_STORAGE_KEY,
+  HISTROTY_MAX_ITEMS,
+  type HistoryEntry,
+} from "./types";
 
 // Safely load history from LocalStorage.
 export function loadHistory(): HistoryEntry[] {
-  if (typeof window === "undefined"){
+  if (typeof window === "undefined") {
     return [];
   }
 
   try {
     const raw = window.localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (!raw){
+    if (!raw) {
       return [];
     }
 
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)){
+    if (!Array.isArray(parsed)) {
       return [];
     }
 
@@ -32,7 +35,7 @@ export function loadHistory(): HistoryEntry[] {
 
 // Safely persist history list to LocalStorage
 export function saveHistory(entries: HistoryEntry[]): void {
-  if (typeof window === "undefined"){
+  if (typeof window === "undefined") {
     return;
   }
 
@@ -54,7 +57,7 @@ export function appendHistoryEntry(newEntry: HistoryEntry): HistoryEntry[] {
 
 // Clear all history entries from storage.
 export function clearHistory(): void {
-  if (typeof window === "undefined"){
+  if (typeof window === "undefined") {
     return;
   }
 

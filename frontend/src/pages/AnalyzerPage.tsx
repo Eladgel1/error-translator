@@ -76,7 +76,7 @@ function formatAIResponseText(r: AIResponse): string {
 
   parts.push(
     `---\nDetected Language: **${r.language_detected}**  
-Confidence: **${(r.confidence * 100).toFixed(1)}%**`
+Confidence: **${(r.confidence * 100).toFixed(1)}%**`,
   );
 
   return parts.join("\n");
@@ -93,7 +93,8 @@ function toAIResponse(response: {
   confidence: number;
 }): AIResponse {
   return {
-    language_detected: response.language_detected as AIResponse["language_detected"],
+    language_detected:
+      response.language_detected as AIResponse["language_detected"],
     summary: response.summary,
     likely_cause: response.likely_cause,
     fix_steps: response.fix_steps,
@@ -370,9 +371,7 @@ export function AnalyzerPage() {
       {/* Conversation */}
       <section className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg shadow-slate-950/40 lg:p-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-100">
-            Conversation
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-100">Conversation</h2>
           {apiError && (
             <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-200">
               {uiError?.title ?? "Something went wrong"}
@@ -384,13 +383,15 @@ export function AnalyzerPage() {
           {chat.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+              className={`flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
               <div
-                className={`relative max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md shadow-slate-950/60 transition-all ${msg.role === "user"
-                  ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
-                  : "border border-slate-700/80 bg-slate-900/90 text-slate-100"
+                className={`relative max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md shadow-slate-950/60 transition-all ${
+                  msg.role === "user"
+                    ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
+                    : "border border-slate-700/80 bg-slate-900/90 text-slate-100"
                 }`}
               >
                 <div className="prose prose-invert text-sm">

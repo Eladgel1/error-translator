@@ -22,5 +22,5 @@ export type PersistedAnalysis = {
 export type AnalyzePersistedPayload = {
   error_text: string;
   context?: string | null;
-  language_hint?: LanguageHint; 
+  language_hint?: LanguageHint;
 };

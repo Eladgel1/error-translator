@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  
+
   test: {
     globals: true,
     setupFiles: "./src/setupTests.ts",
@@ -11,5 +11,4 @@ export default defineConfig({
     css: false,
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
   },
-  
 });

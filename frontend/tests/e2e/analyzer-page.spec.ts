@@ -6,7 +6,8 @@ const ERROR_EXAMPLE = "TypeError: Cannot read properties of undefined";
 const mockAnalysisResponse = {
   language_detected: "javascript",
   summary: "Mocked summary for E2E test.",
-  likely_cause: "The code is trying to access a property on an undefined value.",
+  likely_cause:
+    "The code is trying to access a property on an undefined value.",
   fix_steps: [
     "Check that the object exists before reading from it.",
     "Add a guard clause or optional chaining.",
@@ -47,12 +48,14 @@ test.describe("Analyzer Page E2E", () => {
     await page.evaluate(() => localStorage.clear());
   });
 
-  test("smoke: paste error -> analyze -> summary & history", async ({ page }) => {
+  test("smoke: paste error -> analyze -> summary & history", async ({
+    page,
+  }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const contextTextarea = page.getByPlaceholder(
-      "Optional context... (e.g your code section)"
+      "Optional context... (e.g your code section)",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
@@ -65,18 +68,16 @@ test.describe("Analyzer Page E2E", () => {
 
     await analyzeButton.click();
 
-    await expect(
-      page.getByRole("heading", { name: /Summary/i })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Summary/i })).toBeVisible();
 
     await expect(
-      page.getByRole("button", { name: /Clear History/i })
+      page.getByRole("button", { name: /Clear History/i }),
     ).toBeVisible();
   });
 
   test("example preset fills form and enables Analyze", async ({ page }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
@@ -91,10 +92,10 @@ test.describe("Analyzer Page E2E", () => {
 
   test("clear button resets form and chat", async ({ page }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const contextTextarea = page.getByPlaceholder(
-      "Optional context... (e.g your code section)"
+      "Optional context... (e.g your code section)",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
     const clearButton = page.getByRole("button", { name: "Clear" });
@@ -114,16 +115,14 @@ test.describe("Analyzer Page E2E", () => {
 
   test("history entry restores form and chat", async ({ page }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
     await errorTextarea.fill(ERROR_EXAMPLE);
     await analyzeButton.click();
 
-    await expect(
-      page.getByRole("heading", { name: /Summary/i })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Summary/i })).toBeVisible();
 
     const historyPanel = page
       .getByRole("heading", { name: "History" })
@@ -136,14 +135,14 @@ test.describe("Analyzer Page E2E", () => {
 
     await expect(errorTextarea).toHaveValue(ERROR_EXAMPLE);
 
-    await expect(
-      page.getByRole("heading", { name: /Summary/i })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Summary/i })).toBeVisible();
   });
 
-  test("clear history removes entries and shows empty state", async ({ page }) => {
+  test("clear history removes entries and shows empty state", async ({
+    page,
+  }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
@@ -158,23 +157,19 @@ test.describe("Analyzer Page E2E", () => {
 
     await clearHistoryButton.click();
 
-    await expect(
-      page.getByText(/No previous analyses yet\./i)
-    ).toBeVisible();
+    await expect(page.getByText(/No previous analyses yet\./i)).toBeVisible();
   });
 
   test("assistant copy button is clickable", async ({ page }) => {
     const errorTextarea = page.getByPlaceholder(
-      "Paste your error message here..."
+      "Paste your error message here...",
     );
     const analyzeButton = page.getByRole("button", { name: "Analyze" });
 
     await errorTextarea.fill("Copy test error");
     await analyzeButton.click();
 
-    await expect(
-      page.getByRole("heading", { name: /Summary/i })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Summary/i })).toBeVisible();
 
     const copyButton = page
       .locator("button")

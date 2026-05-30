@@ -51,9 +51,7 @@ export function AppShell({ children }: AppShellProps) {
         <header
           className={[
             "rounded-3xl border border-slate-800/80 bg-slate-900/70 shadow-[0_18px_60px_rgba(15,23,42,0.65)] backdrop-blur-2xl",
-            isAuthPage
-              ? "mb-8 px-4 py-3 sm:px-5"
-              : "mb-6 px-4 py-4 sm:px-6",
+            isAuthPage ? "mb-8 px-4 py-3 sm:px-5" : "mb-6 px-4 py-4 sm:px-6",
           ].join(" ")}
         >
           <div
@@ -81,9 +79,7 @@ export function AppShell({ children }: AppShellProps) {
                 >
                   Error Translator
                 </p>
-                <p className="text-xs text-slate-400">
-                  AI debugging workspace
-                </p>
+                <p className="text-xs text-slate-400">AI debugging workspace</p>
               </div>
             </Link>
 

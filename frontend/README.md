@@ -56,8 +56,8 @@ frontend/
 
 The frontend expects a single environment variable:
 
-| Name               | Description                 |
-|--------------------|-----------------------------|
+| Name                | Description                 |
+| ------------------- | --------------------------- |
 | `VITE_API_BASE_URL` | Base URL of the backend API |
 
 **Examples**
@@ -156,4 +156,3 @@ The frontend CI workflow (`.github/workflows/cicd-frontend.yml`) performs:
 4. Build the Vite app: `npm run build`.
 5. Build the Docker image and upload it as an artifact.
 6. On pushes to `main`, trigger a Vercel production deploy via `VERCEL_FRONTEND_PROD_HOOK` & Running Playwright E2E tests.
-
