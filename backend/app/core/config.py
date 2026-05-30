@@ -25,5 +25,24 @@ class Settings(BaseSettings):
     ai_request_timeout_seconds: float = 15.0
     ai_max_retries: int = 2
 
+    postgres_db: str = Field(alias="POSTGRES_DB")
+    postgres_user: str = Field(alias="POSTGRES_USER")
+    postgres_password: str = Field(alias="POSTGRES_PASSWORD")
+
+    database_url: str = Field(alias="DATABASE_URL")
+
+    migration_database_url: str | None = Field(
+        default=None,
+        alias="MIGRATION_DATABASE_URL",
+    )
+
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        alias="REDIS_URL",
+    )
+
+    jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 60
 
 settings = Settings()

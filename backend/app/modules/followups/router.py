@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.modules.analysis.dependencies import get_ai_client
+from app.modules.analyses.dependencies import get_ai_client
 from app.modules.followups.schemas import FollowupRequest
 from app.modules.followups.service import followup_analysis_message
 from app.schemas.ai_response import AIResponse

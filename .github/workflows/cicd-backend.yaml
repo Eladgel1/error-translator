@@ -12,14 +12,42 @@ on:
 
 jobs:
   backend-cicd:
-    name: Backend tests, lint and Docker build
+    name: Backend tests, lint, migrations and Docker build
     runs-on: ubuntu-latest
 
-    # Job-wide environment variables
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: error_translator_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d error_translator_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     env:
       APP_NAME: "Error Translator API (CICD)"
       ENVIRONMENT: "test"
       DEBUG: "false"
+      LOG_LEVEL: "INFO"
+
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+
       AI_PROVIDER: "gemini"
       AI_MODEL: "gemini-2.5-flash"
       AI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/models"
@@ -27,9 +55,22 @@ jobs:
       AI_REQUEST_TIMEOUT_SECONDS: "15"
       AI_MAX_RETRIES: "2"
 
+      POSTGRES_DB: "error_translator_test"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/error_translator_test"
+      MIGRATION_DATABASE_URL: "postgresql+psycopg://postgres:postgres@localhost:5432/error_translator_test"
+
+      REDIS_URL: "redis://localhost:6379/0"
+
+      JWT_SECRET_KEY: "dummy-ci-secret-key"
+      JWT_ALGORITHM: "HS256"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+
     defaults:
       run:
         working-directory: backend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,18 +78,26 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"    
-      
+          python-version: "3.12"
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Run ruff (linter)
+      - name: Run ruff
         run: |
           ruff check app tests
-          
+
+      - name: Run database migrations
+        run: |
+          alembic upgrade head
+
+      - name: Validate database migration state
+        run: |
+          alembic current
+
       - name: Run pytest
         run: |
           pytest
@@ -68,12 +117,11 @@ jobs:
         with:
           name: error-translator-backend-ci-image
           path: error-translator-backend-ci.tar
-          if-no-files-found: error  
+          if-no-files-found: error
 
-      - name: Trigger Vercel deploy (Backend)
+      - name: Trigger Vercel deploy Backend
         if: github.ref == 'refs/heads/main'
         run: |
           curl -fsS -X POST "$VERCEL_BACKEND_DEPLOY_HOOK"
         env:
-          VERCEL_BACKEND_DEPLOY_HOOK: ${{ secrets.VERCEL_BACKEND_DEPLOY_HOOK }}  
-              
+          VERCEL_BACKEND_DEPLOY_HOOK: ${{ secrets.VERCEL_BACKEND_DEPLOY_HOOK }}

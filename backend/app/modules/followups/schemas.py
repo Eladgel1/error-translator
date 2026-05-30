@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from app.modules.analysis.schemas import LanguageHint
+from app.modules.analyses.schemas import LanguageHint
 from app.schemas.ai_response import AIResponse
 
 
