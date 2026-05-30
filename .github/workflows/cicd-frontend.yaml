@@ -42,9 +42,9 @@ jobs:
         run: |
           npm run lint
 
-      - name: Run tests (unit)
+      - name: Run frontend tests 
         run: |
-          npm run test:unit
+          npm run test
 
       - name: Build frontend (Vite)
         run: |
