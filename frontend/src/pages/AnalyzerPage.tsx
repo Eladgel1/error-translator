@@ -2,7 +2,8 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import type { AIResponse, ApiError, LanguageHint } from "../types/ai";
-import { analyzeError } from "../api/client";
+import { analyzeError, analyzePersisted } from "../api/client";
+import { getAccessToken } from "../features/auth/authStorage";
 import type { HistoryEntry } from "../features/history/types";
 import {
   Loader2,
@@ -81,6 +82,28 @@ Confidence: **${(r.confidence * 100).toFixed(1)}%**`
   return parts.join("\n");
 }
 
+function toAIResponse(response: {
+  language_detected: AIResponse["language_detected"] | string;
+  summary: string;
+  likely_cause: string;
+  fix_steps: string[];
+  debug_steps: string[];
+  assumptions: string[];
+  followup_questions: string[];
+  confidence: number;
+}): AIResponse {
+  return {
+    language_detected: response.language_detected as AIResponse["language_detected"],
+    summary: response.summary,
+    likely_cause: response.likely_cause,
+    fix_steps: response.fix_steps,
+    debug_steps: response.debug_steps,
+    assumptions: response.assumptions,
+    followup_questions: response.followup_questions,
+    confidence: response.confidence,
+  };
+}
+
 function mapApiErrorToUiError(error: ApiError): UiError {
   const code = error.code ?? "unknown";
   const status = error.status;
@@ -157,6 +180,9 @@ export function AnalyzerPage() {
 
   const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
 
+  const isLoggedIn = Boolean(getAccessToken());
+  const shouldShowLocalHistory = !isLoggedIn;
+
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -231,7 +257,9 @@ export function AnalyzerPage() {
         form.languageHint === "auto" ? undefined : form.languageHint,
     };
 
-    const result = await analyzeError(payload);
+    const result = isLoggedIn
+      ? await analyzePersisted(payload)
+      : await analyzeError(payload);
 
     if (!result.ok) {
       setApiError(result.error);
@@ -240,7 +268,9 @@ export function AnalyzerPage() {
       return;
     }
 
-    const formatted = formatAIResponseText(result.data);
+    const aiResponse = toAIResponse(result.data);
+
+    const formatted = formatAIResponseText(aiResponse);
     pushAssistantMessage(formatted);
 
     const newEntry: HistoryEntry = {
@@ -251,11 +281,13 @@ export function AnalyzerPage() {
         contextText: form.context || undefined,
         languageHint: form.languageHint,
       },
-      response: result.data,
+      response: aiResponse,
     };
 
-    const updated = appendHistoryEntry(newEntry);
-    setHistory(updated);
+    if (shouldShowLocalHistory) {
+      const updated = appendHistoryEntry(newEntry);
+      setHistory(updated);
+    }
 
     setUiError(null);
     setIsLoading(false);
@@ -283,283 +315,270 @@ export function AnalyzerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      {/* Decorative background blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 -right-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-24 h-80 w-80 rounded-full bg-emerald-500/15 blur-3xl" />
-      </div>
+    <section className="flex w-full flex-col gap-8 rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-2xl sm:p-8 lg:p-10">
+      {/* Page intro */}
+      <header className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="rounded-full border border-indigo-400/40 bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-200">
+              AI debugging workspace
+            </span>
 
-      {/* Main content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-8 px-3 py-8">
-        {/* Outer “shell” card */}
-        <div className="flex w-full flex-col gap-8 rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-2xl sm:p-8 lg:p-10 transform md:scale-[0.92] md:origin-top">
-          {/* Header */}
-          <header className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 shadow-lg shadow-indigo-500/40">
-                  <span className="text-lg font-black text-slate-950">ET</span>
-                </div>
-                <div>
-                  <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                    Error Translator
-                  </h1>
-                  <p className="text-sm text-slate-300 sm:text-[0.9rem]">
-                    Your personal AI assistant for debugging, summarizing, and
-                    fixing errors.
-                  </p>
-                </div>
-              </div>
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-100 sm:text-4xl">
+              Analyze and translate errors
+            </h1>
 
-              <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 shadow-sm">
-                Live • Production
-              </span>
-            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-[0.9rem]">
+              Paste an error message, add optional context, and get a structured
+              explanation and debugging guidance.
+            </p>
+          </div>
 
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-700/70 to-transparent" />
-          </header>
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300 shadow-sm">
+            {isLoggedIn ? "Saved to DB" : "Guest Mode"}
+          </span>
+        </div>
 
-          {/* Quick presets */}
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Quick presets
-              </h2>
-              <p className="text-[11px] text-slate-500">
-                Start with a sample error to see how the assistant responds.
-              </p>
-            </div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-700/70 to-transparent" />
+      </header>
 
-            <div className="flex flex-wrap gap-2">
-              {EXAMPLE_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => applyExamplePreset(preset)}
-                  className="rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-xs text-slate-100 shadow-sm shadow-slate-950/40 transition hover:border-indigo-400/80 hover:bg-slate-900 hover:text-indigo-100"
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </section>
+      {/* Quick presets */}
+      <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Quick presets
+          </h2>
+          <p className="text-[11px] text-slate-500">
+            Start with a sample error to see how the assistant responds.
+          </p>
+        </div>
 
-          {/* Conversation */}
-          <section className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg shadow-slate-950/40 lg:p-6">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-100">
-                Conversation
-              </h2>
-              {apiError && (
-                <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-200">
-                  {uiError?.title ?? "Something went wrong"}
-                </span>
-              )}
-            </div>
-
-            <div className="min-h-[320px] space-y-4 overflow-y-auto rounded-xl bg-slate-950/60 p-4">
-              {chat.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`relative max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md shadow-slate-950/60 transition-all ${
-                      msg.role === "user"
-                        ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
-                        : "bg-slate-900/90 text-slate-100 border border-slate-700/80"
-                    }`}
-                  >
-                    <div className="prose prose-invert text-sm">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
-
-                    {msg.role === "assistant" && (
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(msg.content)}
-                        className="absolute top-2 right-2 inline-flex items-center justify-center rounded-full bg-slate-950/70 p-1.5 text-slate-400 ring-1 ring-slate-700/70 transition hover:text-slate-100 hover:ring-indigo-400/70"
-                      >
-                        {copyState === "copied" ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <CopyIcon className="h-4 w-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-900/90 px-4 py-2.5 text-sm text-slate-300 shadow-md shadow-slate-950/60">
-                    <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />
-                    Thinking…
-                  </div>
-                </div>
-              )}
-
-              <div ref={bottomRef} />
-            </div>
-          </section>
-
-          {/* Error banner */}
-          {uiError && (
-            <div className="rounded-2xl border border-red-500/60 bg-red-950/60 p-3 text-sm text-red-100 shadow-lg shadow-red-900/60"
-              role="alert"
+        <div className="flex flex-wrap gap-2">
+          {EXAMPLE_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => applyExamplePreset(preset)}
+              className="rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-xs text-slate-100 shadow-sm shadow-slate-950/40 transition hover:border-indigo-400/80 hover:bg-slate-900 hover:text-indigo-100"
             >
-              <p className="font-semibold">{uiError.title}</p>
-              <p className="mt-1 text-xs text-red-100/90">{uiError.message}</p>
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Conversation */}
+      <section className="flex flex-col rounded-2xl border border-slate-800 bg-slate-950/60 p-4 shadow-lg shadow-slate-950/40 lg:p-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Conversation
+          </h2>
+          {apiError && (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-200">
+              {uiError?.title ?? "Something went wrong"}
+            </span>
+          )}
+        </div>
+
+        <div className="min-h-[320px] space-y-4 overflow-y-auto rounded-xl bg-slate-950/60 p-4">
+          {chat.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`relative max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md shadow-slate-950/60 transition-all ${msg.role === "user"
+                  ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
+                  : "border border-slate-700/80 bg-slate-900/90 text-slate-100"
+                }`}
+              >
+                <div className="prose prose-invert text-sm">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+
+                {msg.role === "assistant" && (
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(msg.content)}
+                    className="absolute top-2 right-2 inline-flex items-center justify-center rounded-full bg-slate-950/70 p-1.5 text-slate-400 ring-1 ring-slate-700/70 transition hover:text-slate-100 hover:ring-indigo-400/70"
+                  >
+                    {copyState === "copied" ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <CopyIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-700/80 bg-slate-900/90 px-4 py-2.5 text-sm text-slate-300 shadow-md shadow-slate-950/60">
+                <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />
+                Thinking…
+              </div>
             </div>
           )}
 
-          {/* History */}
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="flex items-center gap-1 text-sm font-semibold text-slate-100">
-                <History className="h-4 w-4 text-slate-300" />
-                History
-              </h2>
-
-              {history.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleClearHistory}
-                  className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-emerald-300 transition hover:bg-slate-800 hover:text-emerald-200"
-                >
-                  <Trash2 className="h-3 w-3" />
-                Clear History
-                </button>
-              )}
-            </div>
-
-            {history.length === 0 ? (
-              <p className="text-xs text-slate-400">
-                No previous analyses yet.
-              </p>
-            ) : (
-              <ul className="mt-1 max-h-56 space-y-1 overflow-y-auto text-xs">
-                {history.map((entry) => (
-                  <li key={entry.id}>
-                    <button
-                      type="button"
-                      onClick={() => restoreFromHistory(entry)}
-                      className="group w-full rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-left transition hover:border-indigo-500/70 hover:bg-slate-900/90"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-slate-200 group-hover:text-indigo-200">
-                          {entry.response.language_detected.toUpperCase()}
-                        </span>
-                        <span className="text-[10px] text-slate-500">
-                          {new Date(entry.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="mt-1 line-clamp-1 text-[11px] text-slate-300 group-hover:text-slate-100">
-                        {entry.input.errorText}
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* Form */}
-          <form
-            onSubmit={handleAnalyzeSubmit}
-            className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-lg shadow-slate-950/50 sm:p-6"
-          >
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Error message
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
-                  placeholder="Paste your error message here..."
-                  value={form.errorText}
-                  onChange={(e) => {
-                    if (uiError?.type === "validation") clearErrors();
-                    setForm((p) => ({ ...p, errorText: e.target.value }));
-                  }}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Optional context
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
-                  placeholder="Optional context... (e.g your code section)"
-                  value={form.context}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, context: e.target.value }))
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-4 sm:flex-row">
-              <div className="flex w-full items-center gap-2 sm:w-auto">
-                <label className="text-xs font-medium text-slate-300">
-                  Language hint
-                </label>
-                <select
-                  className="rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40 cursor-pointer"
-                  value={form.languageHint}
-                  onChange={(e) =>
-                    setForm((p) => ({
-                      ...p,
-                      languageHint: e.target.value as LanguageHint,
-                    }))
-                  }
-                >
-                  <option value="auto">Auto-detect</option>
-                  <option value="javascript">JavaScript</option>
-                  <option value="python">Python</option>
-                  <option value="java">Java</option>
-                </select>
-              </div>
-
-              <div className="flex w-full justify-end gap-2 sm:w-auto">
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-950/60 transition hover:border-red-400/70 hover:bg-red-950/40 hover:text-red-100"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Clear
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || !form.errorText.trim()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <PencilLine className="h-4 w-4" />
-                      Analyze
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </form>
+          <div ref={bottomRef} />
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Error banner */}
+      {uiError && (
+        <div
+          className="rounded-2xl border border-red-500/60 bg-red-950/60 p-3 text-sm text-red-100 shadow-lg shadow-red-900/60"
+          role="alert"
+        >
+          <p className="font-semibold">{uiError.title}</p>
+          <p className="mt-1 text-xs text-red-100/90">{uiError.message}</p>
+        </div>
+      )}
+
+      {/* History */}
+      {shouldShowLocalHistory && (
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/40">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="flex items-center gap-1 text-sm font-semibold text-slate-100">
+              <History className="h-4 w-4 text-slate-300" />
+              History
+            </h2>
+
+            {history.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearHistory}
+                className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-[11px] font-medium text-emerald-300 transition hover:bg-slate-800 hover:text-emerald-200"
+              >
+                <Trash2 className="h-3 w-3" />
+                Clear History
+              </button>
+            )}
+          </div>
+
+          {history.length === 0 ? (
+            <p className="text-xs text-slate-400">No previous analyses yet.</p>
+          ) : (
+            <ul className="mt-1 max-h-56 space-y-1 overflow-y-auto text-xs">
+              {history.map((entry) => (
+                <li key={entry.id}>
+                  <button
+                    type="button"
+                    onClick={() => restoreFromHistory(entry)}
+                    className="group w-full rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-left transition hover:border-indigo-500/70 hover:bg-slate-900/90"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-200 group-hover:text-indigo-200">
+                        {entry.response.language_detected.toUpperCase()}
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        {new Date(entry.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="mt-1 line-clamp-1 text-[11px] text-slate-300 group-hover:text-slate-100">
+                      {entry.input.errorText}
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {/* Form */}
+      <form
+        onSubmit={handleAnalyzeSubmit}
+        className="space-y-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-lg shadow-slate-950/50 sm:p-6"
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Error message
+            </label>
+            <textarea
+              rows={4}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
+              placeholder="Paste your error message here..."
+              value={form.errorText}
+              onChange={(e) => {
+                if (uiError?.type === "validation") clearErrors();
+                setForm((p) => ({ ...p, errorText: e.target.value }));
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Optional context
+            </label>
+            <textarea
+              rows={4}
+              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
+              placeholder="Optional context... (e.g your code section)"
+              value={form.context}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, context: e.target.value }))
+              }
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-4 sm:flex-row">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <label className="text-xs font-medium text-slate-300">
+              Language hint
+            </label>
+            <select
+              className="cursor-pointer rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/40"
+              value={form.languageHint}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  languageHint: e.target.value as LanguageHint,
+                }))
+              }
+            >
+              <option value="auto">Auto-detect</option>
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+            </select>
+          </div>
+
+          <div className="flex w-full justify-end gap-2 sm:w-auto">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/80 px-4 py-2 text-sm font-medium text-slate-100 shadow-sm shadow-slate-950/60 transition hover:border-red-400/70 hover:bg-red-950/40 hover:text-red-100"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear
+            </button>
+
+            <button
+              type="submit"
+              disabled={isLoading || !form.errorText.trim()}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <PencilLine className="h-4 w-4" />
+                  Analyze
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
   );
 }

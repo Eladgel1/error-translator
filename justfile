@@ -149,10 +149,10 @@ run-frontend-docker-prod:
 # =========================================
 
 compose-up:
-    docker compose up --build
+    docker compose --env-file ./backend/.env up --build
 
 compose-up-detached:
-    docker compose up -d --build
+    docker compose --env-file ./backend/.env up -d --build
 
 compose-down:
-    docker compose down
+    docker compose --env-file ./backend/.env down

@@ -16,6 +16,9 @@ line-length = 100
 target-version = "py312"
 src = ["app", "tests"]
 select = ["E", "F", "I"]
+exclude = [
+  "app/db/migrations/versions"
+]
 ignore = []
 fix = true
 
