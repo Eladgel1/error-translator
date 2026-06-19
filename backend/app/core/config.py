@@ -45,4 +45,29 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60
 
+    password_reset_code_ttl_minutes: int = Field(
+        default=10,
+        alias="PASSWORD_RESET_CODE_TTL_MINUTES",
+    )
+    password_reset_resend_cooldown_seconds: int = Field(
+        default=60,
+        alias="PASSWORD_RESET_RESEND_COOLDOWN_SECONDS",
+    )
+    password_reset_max_attempts: int = Field(
+        default=5,
+        alias="PASSWORD_RESET_MAX_ATTEMPTS",
+    )
+
+    smtp_host: str = Field(default="smtp.gmail.com", alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_username: str | None = Field(default=None, alias="SMTP_USERNAME")
+    smtp_password: str | None = Field(default=None, alias="SMTP_PASSWORD")
+    smtp_from_email: str | None = Field(default=None, alias="SMTP_FROM_EMAIL")
+    smtp_from_name: str = Field(default="Error Translator", alias="SMTP_FROM_NAME")
+    smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
+    smtp_request_timeout_seconds: float = Field(
+        default=10.0,
+        alias="SMTP_REQUEST_TIMEOUT_SECONDS",
+    )
+
 settings = Settings()
