@@ -1,10 +1,16 @@
 /* eslint-disable camelcase */
-import { findAllByAltText, render, screen, waitFor } from "@testing-library/react";
+import {
+  findAllByAltText,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AnalyzerPage } from "../../src/pages/AnalyzerPage";
 import type { AIResponse } from "../../src/types/ai";
 import { vi, describe, it, expect, type Mock } from "vitest";
 import { analyzeError } from "../../src/api/client";
+import { HISTORY_STORAGE_KEY } from "../../src/features/history/types";
 
 // Mock the API client
 vi.mock("../../src/api/client", () => {
@@ -12,7 +18,6 @@ vi.mock("../../src/api/client", () => {
     analyzeError: vi.fn(),
   };
 });
-
 
 const fakeResponse: AIResponse = {
   language_detected: "javascript",
@@ -29,7 +34,9 @@ describe("AnalyzerPage Component", () => {
   it("renders initial form and disables Analyze when error text is empty", () => {
     render(<AnalyzerPage />);
 
-    const textarea = screen.getByPlaceholderText(/Paste your error message here/i);
+    const textarea = screen.getByPlaceholderText(
+      /Paste your error message here/i,
+    );
     expect(textarea).toBeInTheDocument();
 
     const analyzeButton = screen.getByRole("button", { name: /Analyze/i });
@@ -47,7 +54,7 @@ describe("AnalyzerPage Component", () => {
 
     await user.type(
       screen.getByPlaceholderText(/Paste your error message here/i),
-      "TypeError: Cannot read properties of undefined"
+      "TypeError: Cannot read properties of undefined",
     );
 
     const analyzeButton = screen.getByRole("button", { name: /Analyze/i });
@@ -81,7 +88,7 @@ describe("AnalyzerPage Component", () => {
 
     await user.type(
       screen.getByPlaceholderText(/Paste your error message here/i),
-      "x"
+      "x",
     );
 
     const analyzeButton = screen.getByRole("button", { name: /Analyze/i });
@@ -103,7 +110,7 @@ describe("AnalyzerPage Component", () => {
 
     await user.type(
       screen.getByPlaceholderText(/Paste your error message here/i),
-      "Some error"
+      "Some error",
     );
 
     const analyzeButton = screen.getByRole("button", { name: /Analyze/i });
@@ -129,7 +136,7 @@ describe("AnalyzerPage Component", () => {
         response: fakeResponse,
       },
     ];
-    localStorage.setItem("et_history", JSON.stringify(mockHistory));
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(mockHistory));
     render(<AnalyzerPage />);
   });
   it("restores a history entry when clicked", async () => {
@@ -137,16 +144,20 @@ describe("AnalyzerPage Component", () => {
       {
         id: "1",
         createdAt: new Date().toISOString(),
-        input: { errorText: "Restored error", contextText: "", languageHint: "python" },
+        input: {
+          errorText: "Restored error",
+          contextText: "",
+          languageHint: "python",
+        },
         response: fakeResponse,
       },
     ];
-    localStorage.setItem("et_history", JSON.stringify(mockHistory));
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(mockHistory));
     render(<AnalyzerPage />);
     const user = userEvent.setup();
     const entryBtn = screen.getByRole("button", { name: /PYTHON/i });
     await user.click(entryBtn);
-    expect(entryBtn).toHaveTextContent(/python/i);;
+    expect(entryBtn).toHaveTextContent(/python/i);
   });
   it("clears history when Clear History button is clicked", async () => {
     const mockHistory = [
@@ -157,13 +168,13 @@ describe("AnalyzerPage Component", () => {
         response: fakeResponse,
       },
     ];
-    localStorage.setItem("et_history", JSON.stringify(mockHistory));
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(mockHistory));
     render(<AnalyzerPage />);
     const user = userEvent.setup();
     const clearBtn = screen.getByRole("button", { name: /Clear history/i });
     await user.click(clearBtn);
     await waitFor(() =>
-      expect(screen.queryByText(/error to clear/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/error to clear/i)).not.toBeInTheDocument(),
     );
   });
   it("applies an example preset when clicked", async () => {

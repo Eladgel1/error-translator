@@ -22,3 +22,23 @@ export type LoginPayload = {
   email: string;
   password: string;
 };
+
+export type PasswordResetRequestPayload = {
+  email: string;
+};
+
+export type PasswordResetVerifyPayload = {
+  email: string;
+  code: string;
+};
+
+export type PasswordResetConfirmPayload = {
+  email: string;
+  code: string;
+  new_password: string;
+  confirm_new_password: string;
+};
+
+export type PasswordResetMessageResponse = {
+  message: string;
+};

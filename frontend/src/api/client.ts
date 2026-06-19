@@ -2,6 +2,10 @@ import { getAccessToken } from "../features/auth/authStorage";
 import type {
   AuthResponse,
   LoginPayload,
+  PasswordResetConfirmPayload,
+  PasswordResetMessageResponse,
+  PasswordResetRequestPayload,
+  PasswordResetVerifyPayload,
   RegisterPayload,
   User,
 } from "../features/auth/types";
@@ -188,6 +192,42 @@ export async function loginUser(
   return apiPost<AuthResponse, LoginPayload>("/api/auth/login", payload, {
     auth: false,
   });
+}
+
+export async function requestPasswordReset(
+  payload: PasswordResetRequestPayload,
+): Promise<ApiResult<PasswordResetMessageResponse>> {
+  return apiPost<PasswordResetMessageResponse, PasswordResetRequestPayload>(
+    "/api/auth/password-reset/request",
+    payload,
+    {
+      auth: false,
+    },
+  );
+}
+
+export async function verifyPasswordResetCode(
+  payload: PasswordResetVerifyPayload,
+): Promise<ApiResult<PasswordResetMessageResponse>> {
+  return apiPost<PasswordResetMessageResponse, PasswordResetVerifyPayload>(
+    "/api/auth/password-reset/verify",
+    payload,
+    {
+      auth: false,
+    },
+  );
+}
+
+export async function confirmPasswordReset(
+  payload: PasswordResetConfirmPayload,
+): Promise<ApiResult<PasswordResetMessageResponse>> {
+  return apiPost<PasswordResetMessageResponse, PasswordResetConfirmPayload>(
+    "/api/auth/password-reset/confirm",
+    payload,
+    {
+      auth: false,
+    },
+  );
 }
 
 export async function getMe(): Promise<ApiResult<User>> {

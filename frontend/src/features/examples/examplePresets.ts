@@ -1,12 +1,12 @@
 import type { LanguageHint } from "../../types/ai";
 
 export interface ExamplePreset {
-    id: string;
-    label: string;
-    description?: string;
-    languageHint: LanguageHint;
-    errorText: string;
-    contextText?: string;
+  id: string;
+  label: string;
+  description?: string;
+  languageHint: LanguageHint;
+  errorText: string;
+  contextText?: string;
 }
 
 // Set of presets per language
@@ -21,7 +21,7 @@ export const EXAMPLE_PRESETS: ExamplePreset[] = [
       "Traceback (most recent call last):",
       '  File "main.py", line 5, in <module>',
       "    result = divide(10, 0)",
-      "  File \"main.py\", line 2, in divide",
+      '  File "main.py", line 2, in divide',
       "    return a / b",
       "ZeroDivisionError: division by zero",
     ].join("\n"),
@@ -39,10 +39,9 @@ export const EXAMPLE_PRESETS: ExamplePreset[] = [
     languageHint: "javascript",
     errorText:
       "TypeError: Cannot read properties of undefined (reading 'name')",
-    contextText: [
-      "const user = undefined;",
-      "console.log(user.name);",
-    ].join("\n"),
+    contextText: ["const user = undefined;", "console.log(user.name);"].join(
+      "\n",
+    ),
   },
   {
     id: "java-nullpointer-stacktrace",
@@ -50,7 +49,7 @@ export const EXAMPLE_PRESETS: ExamplePreset[] = [
     description: "Basic Java NullPointerException stacktrace",
     languageHint: "java",
     errorText: [
-      "Exception in thread \"main\" java.lang.NullPointerException: Cannot invoke \"User.getName()\" because \"user\" is null",
+      'Exception in thread "main" java.lang.NullPointerException: Cannot invoke "User.getName()" because "user" is null',
       "\tat com.example.Main.main(Main.java:12)",
     ].join("\n"),
     contextText: [

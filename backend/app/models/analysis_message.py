@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-# Stores coversation-style messages for an analysis
+# Stores conversation-style messages for an analysis.
 # This enables future follow-up chats, workspaces, and threaded debugging flows.
 class AnalysisMessage(Base):
     __tablename__ = "analysis_messages"
