@@ -5,6 +5,7 @@ import { AnalysisDetailsPage } from "./pages/AnalysisDetailsPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<AnalyzerPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />}/>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/analyses/:id" element={<AnalysisDetailsPage />} />
       </Routes>

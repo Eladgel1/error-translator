@@ -80,6 +80,15 @@ export function LoginPage() {
           />
         </label>
 
+        <div className="flex justify-end">
+          <Link
+            to="/reset-password"
+            className="text-sm text-indigo-300 hover:text-indigo-200"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+
         {errorMessage && (
           <div
             role="alert"
